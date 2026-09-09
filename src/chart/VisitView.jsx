@@ -33,17 +33,38 @@ function today() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export default function VisitView({ weightKg }) {
+// `procedure` is shared with the Initial Chart tab (see App.jsx); which visit of
+// it is open stays here, remembered per procedure. The visit id is deliberately
+// not shared: "v2" is the second appointment here and a procedure variant there.
+export default function VisitView({ weightKg, procedure, onSelectProcedure }) {
   const [search, setSearch] = useState("");
-  const [active, setActive] = useState(null);
+  const [visitIds, setVisitIds] = useState({});
   const [mobilePanel, setMobilePanel] = useState("list");
   const [card, dispatch] = useReducer(cardReducer, initialCard);
   const [step, setStep] = useState("fill");
   const [draftText, setDraftText] = useState("");
-  // Session-only, like every other patient value here — never persisted.
+  // Session-only, like every other patient value here — never persisted. Not
+  // reset when the procedure changes: the appointment date is the same date.
   const [date, setDate] = useState(today);
 
-  const selected = active ? findVisit(active.catKey, active.key, active.versionId) : null;
+  const procId = procedure ? `${procedure.catKey}/${procedure.key}` : null;
+  // null when the shared procedure has no visit note (surgical/implant_resto is
+  // Initial-Chart-only), which shows the empty state rather than falling through
+  // to a neighbouring procedure.
+  const selected = procedure ? findVisit(procedure.catKey, procedure.key, visitIds[procId]) : null;
+  const selectionId = selected ? `${procId}/${selected.visit.id}` : null;
+
+  // See the matching block in ChartView.jsx: the selection can change from the
+  // other tab while this view is hidden, and field ids are counted per template,
+  // so the card has to be cleared here rather than in the click handler.
+  const [lastSelectionId, setLastSelectionId] = useState(selectionId);
+  if (selectionId !== lastSelectionId) {
+    setLastSelectionId(selectionId);
+    dispatch({ type: "reset", cdtCodes: procedure ? CDT_CODES[procedure.catKey]?.[procedure.key] ?? [] : [] });
+    setStep("fill");
+    setDraftText("");
+    setMobilePanel("chart");
+  }
   const tokens = useMemo(() => (selected ? tokenizeVisit(selected.visit) : null), [selected]);
   const flatTokens = useMemo(() => (tokens ? flattenTokens(tokens) : []), [tokens]);
   const toothIds = useMemo(
@@ -62,16 +83,15 @@ export default function VisitView({ weightKg }) {
   const filledFields = requiredIds.filter((id) => isFilled(card.fieldValues[id])).length;
 
   function selectVisit(catKey, key, visitId) {
-    setActive({ catKey, key, versionId: visitId });
-    dispatch({ type: "reset", cdtCodes: CDT_CODES[catKey]?.[key] ?? [] });
-    setStep("fill");
-    setDraftText("");
-    setMobilePanel("chart");
+    // null when the sidebar row was clicked rather than a visit pill or a tab in
+    // the card's visit strip — keep the visit remembered for this procedure.
+    if (visitId) setVisitIds((prev) => ({ ...prev, [`${catKey}/${key}`]: visitId }));
+    onSelectProcedure({ catKey, key });
   }
 
   function handleReset() {
-    if (!active) return;
-    dispatch({ type: "reset", cdtCodes: CDT_CODES[active.catKey]?.[active.key] ?? [] });
+    if (!procedure) return;
+    dispatch({ type: "reset", cdtCodes: CDT_CODES[procedure.catKey]?.[procedure.key] ?? [] });
     setStep("fill");
     setDraftText("");
   }
@@ -98,7 +118,7 @@ export default function VisitView({ weightKg }) {
           templates={VISITS}
           search={search}
           onSearch={setSearch}
-          active={active}
+          active={selected ? { ...procedure, versionId: selected.visit.id } : null}
           onSelect={selectVisit}
           className={mobilePanel === "list" ? "mob-visible" : ""}
         />
@@ -144,7 +164,7 @@ export default function VisitView({ weightKg }) {
                   item={selected.item}
                   visit={selected.visit}
                   visits={selected.item.visits}
-                  onSelectVisit={(visitId) => selectVisit(active.catKey, active.key, visitId)}
+                  onSelectVisit={(visitId) => selectVisit(procedure.catKey, procedure.key, visitId)}
                   date={date}
                   onDateChange={setDate}
                   tokens={tokens}

@@ -18,9 +18,12 @@ function findVersion(catKey, key, versionId) {
   return { item, version };
 }
 
-export default function ChartView({ weightKg }) {
+// `procedure` is shared with the Visit Note tab (see App.jsx); the version
+// within it is this tab's own business, remembered per procedure so coming back
+// reopens the same pill.
+export default function ChartView({ weightKg, procedure, onSelectProcedure }) {
   const [search, setSearch] = useState("");
-  const [active, setActive] = useState(null);
+  const [versionIds, setVersionIds] = useState({});
   const [mobilePanel, setMobilePanel] = useState("list");
   const [card, dispatch] = useReducer(cardReducer, initialCard);
   // fill = pick a procedure and fill its blanks; edit = free-text the generated
@@ -28,7 +31,29 @@ export default function ChartView({ weightKg }) {
   const [step, setStep] = useState("fill");
   const [draftText, setDraftText] = useState("");
 
-  const selected = active ? findVersion(active.catKey, active.key, active.versionId) : null;
+  const procId = procedure ? `${procedure.catKey}/${procedure.key}` : null;
+  // null when the shared procedure has no Initial Chart entry, which shows the
+  // empty state rather than falling through to a neighbouring procedure.
+  const selected = procedure
+    ? findVersion(procedure.catKey, procedure.key, versionIds[procId])
+    : null;
+  // What is actually rendered, which is not always the stored id: findVersion
+  // falls back to the first version, and the sidebar pill has to agree with it.
+  const selectionId = selected ? `${procId}/${selected.version.id}` : null;
+
+  // Clearing the card when the selection changes has to happen here, not in the
+  // click handler: the procedure can also change from the other tab, while this
+  // view is mounted but hidden. Field ids are counted per template
+  // (tokenize.js), so "f3" means something different in the next procedure and
+  // stale answers would resurface under the wrong blanks.
+  const [lastSelectionId, setLastSelectionId] = useState(selectionId);
+  if (selectionId !== lastSelectionId) {
+    setLastSelectionId(selectionId);
+    dispatch({ type: "reset", cdtCodes: procedure ? CDT_CODES[procedure.catKey]?.[procedure.key] ?? [] : [] });
+    setStep("fill");
+    setDraftText("");
+    setMobilePanel("chart");
+  }
   const tokens = useMemo(() => (selected ? tokenizeVersion(selected.version) : null), [selected]);
   const flatTokens = useMemo(() => (tokens ? flattenTokens(tokens) : []), [tokens]);
   const toothIds = useMemo(
@@ -48,17 +73,20 @@ export default function ChartView({ weightKg }) {
   const totalFields = requiredIds.length;
   const filledFields = requiredIds.filter((id) => isFilled(card.fieldValues[id])).length;
 
+  // Records the version for this procedure, then hands the procedure up to App.
+  // The card reset is the block above, so re-picking the procedure already open
+  // no longer wipes the answers — that is what Clear is for.
   function selectProc(catKey, key, versionId) {
-    setActive({ catKey, key, versionId });
-    dispatch({ type: "reset", cdtCodes: CDT_CODES[catKey]?.[key] ?? [] });
-    setStep("fill");
-    setDraftText("");
-    setMobilePanel("chart");
+    // versionId is null when the sidebar row was clicked rather than a version
+    // pill: the user asked for the procedure, not for a particular version, so
+    // the one remembered for it stands.
+    if (versionId) setVersionIds((prev) => ({ ...prev, [`${catKey}/${key}`]: versionId }));
+    onSelectProcedure({ catKey, key });
   }
 
   function handleReset() {
-    if (!active) return;
-    dispatch({ type: "reset", cdtCodes: CDT_CODES[active.catKey]?.[active.key] ?? [] });
+    if (!procedure) return;
+    dispatch({ type: "reset", cdtCodes: CDT_CODES[procedure.catKey]?.[procedure.key] ?? [] });
     setStep("fill");
     setDraftText("");
   }
@@ -85,7 +113,7 @@ export default function ChartView({ weightKg }) {
         templates={TEMPLATES}
         search={search}
         onSearch={setSearch}
-        active={active}
+        active={selected ? { ...procedure, versionId: selected.version.id } : null}
         onSelect={selectProc}
         className={mobilePanel === "list" ? "mob-visible" : ""}
       />

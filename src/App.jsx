@@ -16,6 +16,16 @@ export default function App() {
   // the "no data stored" footer claim) so Chart's anesthesia calculator can
   // use the weight entered on the Dosage tab.
   const [weightKg, setWeightKg] = useState(null);
+  // Which procedure the two chart tabs are on. Shared so switching tabs keeps
+  // you on the same procedure instead of showing whatever that tab was last
+  // left on. Session-only, like weightKg.
+  //
+  // Only { catKey, key } is shared. The version or visit *inside* the procedure
+  // stays local to each tab, because the ids mean different things: Initial
+  // Chart's "v2" is a variant of the procedure (a surgical extraction), while
+  // Visit Note's "v2" is the second appointment. Carrying the id across would
+  // quietly open a different note.
+  const [procedure, setProcedure] = useState(null);
 
   // One-time cleanup: the old full-screen disclaimer gate is gone, so this
   // key from prior versions is dead weight in returning users' localStorage.
@@ -42,10 +52,10 @@ export default function App() {
 
       <div className="app-content">
         <div className={mode === "chart" ? "" : "hidden"}>
-          <ChartView weightKg={weightKg} />
+          <ChartView weightKg={weightKg} procedure={procedure} onSelectProcedure={setProcedure} />
         </div>
         <div className={mode === "visit" ? "" : "hidden"}>
-          <VisitView weightKg={weightKg} />
+          <VisitView weightKg={weightKg} procedure={procedure} onSelectProcedure={setProcedure} />
         </div>
         <div className={mode === "dosage" ? "" : "hidden"}>
           <DosageCalculator onWeightKgChange={setWeightKg} />

@@ -22,6 +22,8 @@ Stack: React 19 + Vite, plain CSS, no state library. Session-only patient data.
 | 2026-09-06 | `44a8295` | Periodontal diagnosis: 2017 World Workshop (extent / stage / grade optional) and 1999 AAP |
 | 2026-09-06 | (pending) | Visit Note tab: per-visit templates ported verbatim from the prototype, a tab per visit, date, Outcome / Next appointment |
 | 2026-09-08 | (pending) | Template audit: A/P + Visit Note override layers, vocabulary cleanup, 6 new procedures, AAPD anesthetic limits |
+| 2026-09-09 | `ce987c7` | Template audit shipped and deployed |
+| 2026-09-09 | (pending) | Procedure selection shared across the two chart tabs |
 
 ### What the last three commits added
 
@@ -126,6 +128,43 @@ pericoronitis reasons contradicted its fixed "non-restorable"), and mepivacaine
 carries `unconfirmedAbsoluteMaxMg` so a result above the published 300–400 mg
 range is flagged without either figure entering the arithmetic.
 
+### Procedure selection now follows the tab switch (2026-09-09)
+
+Picking a procedure on Initial Chart and moving to Visit Note used to land on
+whatever that tab was last left on, which reads as the procedure changing by
+itself. `App.jsx` holds `{ catKey, key }` now, beside `weightKg` and just as
+session-only, and both chart tabs read it.
+
+What deliberately does not travel:
+
+- **The version or visit id.** Initial Chart's `v2` is a variant of the
+  procedure, Visit Note's `v2` is the second appointment. Each tab keeps its own,
+  in a map keyed by procedure, so returning to a tab reopens the pill it had.
+- **The filled blanks.** Field ids are counted per template in `tokenize.js`, so
+  `f3` means something different in the next procedure. Both views clear the card
+  when the selection changes, in a render-time sync rather than the click
+  handler — the procedure can change from the other tab while the view is mounted
+  but hidden, and a click handler never runs for that.
+- **A procedure the other tab does not have.** 31 of 32 are on both;
+  `surgical/implant_resto` is Initial-Chart-only and now shows the empty state
+  there instead of falling through to a neighbour.
+
+Clicking a procedure row now means "open this procedure" and nothing more:
+`Sidebar` passes `null` for the sub-entry, so the remembered version or visit
+stands and only a pill click changes it. Passing the first entry, as it used to,
+overwrote the memory on every visit to the row and left it working across a tab
+switch but not within a tab.
+
+One behavior change worth knowing: clicking the procedure that is already open no
+longer wipes the answers. That reset used to live in the click handler and fired
+on every click, including a re-click. `Clear` is the way to empty a note.
+
+Verified by driving the built app in headless Chromium over the DevTools
+protocol: the procedure carries across, `v2` does not, the Initial-only procedure
+falls back to the empty state, a filled tooth number does not survive a
+cross-tab procedure change (0/8 filled on arrival), and the console stays clean —
+in particular no "Too many re-renders" from the render-time sync.
+
 ### Awaiting CJ's clinical review
 
 - `src/dosage/rxOptions.js` — sig wording (routes, frequencies, refills).
@@ -219,47 +258,7 @@ rising), then chairside: pick each converted visit, confirm every blank has a
 list, fill it, copy the note and read it for grammar where a group's separator
 meets the surrounding punctuation.
 
-### 2. Keep the procedure selection when switching tabs
-
-**Today:** pick a procedure on Initial Chart, switch to Visit Note, and the
-Visit Note shows whatever it had selected before — usually a different procedure,
-or the empty state. The reverse happens too. Chairside this means re-finding the
-same procedure in the sidebar every time you move between the workup note and
-the appointment note.
-
-**Cause:** `App.jsx` keeps all three views mounted and hides the inactive ones
-with a CSS class, so no state is lost — but the selection is not shared either.
-`ChartView.jsx:23` and `VisitView.jsx` each hold their own
-`const [active, setActive] = useState(null)`, and `App.jsx` shares only
-`weightKg`. Nothing tells the other tab which procedure is open.
-
-**Wanted:** the procedure follows the tab switch. Lift `{ catKey, key }` into
-`App.jsx` next to `weightKg` and pass it to both chart tabs.
-
-Points to settle before building it:
-
-- **Share the procedure, not the sub-selection.** The version and visit id
-  namespaces collide without meaning the same thing: Initial Chart uses `v1`/`v2`
-  where `v2` is a variant ("Surgical" extraction), Visit Note uses `v1`–`v5`
-  where `v2` is the second appointment. Carrying `v2` across would silently
-  switch the note to something else. Each tab keeps its own sub-selection, keyed
-  by procedure so returning to a tab restores what was open there.
-- **One procedure is not on both tabs.** 31 of 32 are shared; `surgical/implant_resto`
-  exists on Initial Chart only. Switching to Visit Note with it selected has to
-  fall back to the empty state, not crash and not silently pick a neighbour.
-  Watch `findVisit()`, which already falls back to `item.visits[0]` for a missing
-  visit id — the same leniency at the item level is what would hide the problem.
-- **Filled blanks must not travel.** Field ids come from `tokenize.js` counting
-  per template, so id `f3` means different things in two templates. The card
-  state stays per tab. Decide whether switching tabs mid-fill keeps each tab's
-  own answers (it does today, for free) or resets — keeping them is both cheaper
-  and less surprising.
-- **The tooth number is the one value worth sharing.** It already syncs within a
-  note; carrying it across tabs would save the most typing. Separate decision,
-  and it needs the same PHI treatment as `weightKg` (session-only, never
-  persisted).
-
-### 3. Drop unfilled blanks when advancing a step
+### 2. Drop unfilled blanks when advancing a step
 
 **Today:** pressing `Next` serializes an unfilled required blank as a literal
 `[anesthetic]` placeholder, so the draft carries bracket text the clinician has
@@ -286,7 +285,7 @@ Points to settle before building it:
 Same behavior applies to the Rx step, where an empty `Disp` currently prints
 `________`.
 
-### 4. Smaller items
+### 3. Smaller items
 
 - Mobile (375px): the chart topbar title overlaps the `0/10 filled` counter.
   Pre-existing layout bug, not caused by the recent work.

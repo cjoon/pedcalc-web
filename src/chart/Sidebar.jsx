@@ -2,6 +2,11 @@
 // which set is listed; a procedure's sub-entries are `versions` on the Chart
 // tab and `visits` on the Visit Note tab, so the pill row reads whichever is
 // present. Every procedure has at least one, so the first is the default.
+//
+// onSelect's third argument is the sub-entry the user asked for, or null when
+// they clicked the procedure itself and expressed no preference. The views
+// remember a sub-entry per procedure, so null means "keep what I had" — passing
+// the first entry here would overwrite that on every visit to the row.
 function subEntries(item) {
   return item.versions ?? item.visits ?? [];
 }
@@ -34,7 +39,7 @@ export default function Sidebar({ templates, search, onSearch, active, onSelect,
                   <div key={key}>
                     <div
                       className={`proc-item${isActive ? " active" : ""}`}
-                      onClick={() => onSelect(catKey, key, entries[0].id)}
+                      onClick={() => onSelect(catKey, key, null)}
                     >
                       <span>{item.name}</span>
                       <span className="tag">{item.tag}</span>
