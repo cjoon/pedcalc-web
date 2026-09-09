@@ -49,14 +49,20 @@ Pages: cjoon.github.io/pedcalc-web. See PLAN.md for the integration roadmap.
 - src/chart/chart.css             : Chart-tab-only styles
 - src/chart/data/initialTemplates.js : FACTORY_TEMPLATES, verbatim from the prototype
 - src/chart/data/dropdownOptions.js  : OPTIONS/PH_LABELS, verbatim from the prototype
-- src/chart/data/soOverrides.js      : S/O rewrites with "{+ph}" multi-select blanks
-- src/chart/data/soOptions.js        : MULTI_FIELDS — S/O finding vocabulary (CJ reviews)
+- src/chart/data/chartOverrides.js   : Initial Chart S/O/A/P rewrites ("{+ph}" blanks, Dx on A)
+- src/chart/data/vnOverrides.js      : Visit Note S/O/A rewrites (narrow — wrong/contradicting lines)
+- src/chart/data/optionOverrides.js  : OPTION_OVERRIDES/LABEL_OVERRIDES — replaces a prototype {ph} list
+- src/chart/data/extraTemplates.js   : EXTRA_TEMPLATES/EXTRA_VISITS — procedures not in the prototype
+- src/chart/data/fieldVocabulary.js  : CHART_/VISIT_ OPTIONS+LABELS, the merged dropdown vocabularies
+- src/chart/data/templateBuild.js    : shared override asserts, "{ph}" validation, extras merge
+- src/chart/data/soOptions.js        : MULTI_FIELDS — S/O/A finding + diagnosis vocabulary (CJ reviews)
 - src/chart/data/sutureOptions.js    : suture sizes + materials (CJ-confirmed list)
-- src/chart/data/templates.js        : TEMPLATES = FACTORY_TEMPLATES + SO_OVERRIDES (what the UI renders)
+- src/chart/data/templates.js        : TEMPLATES = FACTORY + chartOverrides + EXTRA (Initial Chart tab)
+- src/chart/data/visits.js           : VISITS = VN_TEMPLATES + vnOverrides + EXTRA (Visit Note tab)
 - src/chart/data/visitTemplates.js   : VN_TEMPLATES, verbatim from the prototype (25 procs, 50 visits)
 - src/chart/data/visitOptions.js     : VN_EXTRA_OPTIONS, verbatim — Visit-Note-only dropdown lists
 - src/chart/data/cdtCodes.js         : CDT code per procedure (UNKNOWN — empty until CJ provides)
-- src/chart/data/anesthetics.js      : anesthetic agent specs (only Lidocaine max confirmed)
+- src/chart/data/anesthetics.js      : anesthetic agent specs; limits come from medications.js
 - scripts/check-data-parity.mjs      : chart data vs. dental-charting.html, exit 1 on mismatch
 
 ## Domain Rules (NEVER violate)
@@ -70,24 +76,38 @@ Pages: cjoon.github.io/pedcalc-web. See PLAN.md for the integration roadmap.
   text, hint/empty-state copy) must stay VERBATIM. Don't edit clinical
   phrasing while refactoring; run `node scripts/check-data-parity.mjs` after
   touching src/chart/data/*.
-- The one sanctioned exception: S and O are rewritten in
-  src/chart/data/soOverrides.js (multi-select findings). initialTemplates.js and
-  dropdownOptions.js stay byte-identical to the prototype, A/P are never
-  overridden, and the parity script enforces both.
-- Visit Note data (visitTemplates.js, visitOptions.js) has NO override layer —
-  it is byte-identical to the prototype's VN_TEMPLATES / VN_OPTIONS extras and
-  must stay that way. Rewriting its S/O into "{+ph}" multi-selects needs its own
-  override file plus CJ's review of the vocabulary; do not edit these in place.
+- The sanctioned exception is the override layer, never an in-place edit. The
+  four prototype files (initialTemplates.js, dropdownOptions.js,
+  visitTemplates.js, visitOptions.js) stay byte-identical; every change goes in
+  chartOverrides.js (Initial S/O/A/P), vnOverrides.js (Visit Note),
+  optionOverrides.js (a {ph} dropdown list) or extraTemplates.js (a procedure the
+  prototype lacks). The parity script proves the prototype files are untouched
+  and that every difference in the rendered data has an override declaring it —
+  an undeclared difference is exit 1.
+- A new procedure goes in extraTemplates.js under a key no factory category or
+  item already uses; the parity script rejects a key that shadows prototype data.
+- Every "{ph}" must resolve: a "{+group}" needs an entry in soOptions.js, a plain
+  "{ph}" needs a list in OPTIONS/OPTION_OVERRIDES or a label. templates.js and
+  visits.js throw at module load otherwise — do not silence that, fix the key.
 - Prescription text (src/dosage/rx.js) never computes a dose. It formats the
   already-capped values from calculations.js, and never asserts a route it
   doesn't know (injectables default to a blank route, not "by mouth").
 - No PHI fields anywhere in the app. Patient state (weightKg, chart field
   values, anesthesia inputs) is session-only — never written to
   localStorage/sessionStorage — and must reset on page refresh by design.
-- Anesthesia max-dose has one source of truth: src/medications.js (already
-  governs the Dosage tab). src/chart/data/anesthetics.js must not introduce
-  a second, possibly conflicting max — leave `maxMgPerKg`/`absoluteMaxMg` as
-  `null` (UNKNOWN) until medications.js covers that agent.
+- Anesthesia max-dose has one source of truth: src/medications.js (which also
+  governs the Dosage tab). src/chart/data/anesthetics.js holds no limits at all —
+  each agent carries a `medicationId` and src/chart/anesthesia.js reads mg/kg and
+  the absolute cap from medications.js. Never add a max there; add the drug to
+  medications.js instead. Mepivacaine's absolute per-appointment cap is UNKNOWN
+  (sources disagree, 300 vs 400 mg) and stays `null` until CJ confirms.
+- Only `absoluteMaxMg` caps a calculation. `unconfirmedAbsoluteMaxMg` records
+  published figures the app cannot adopt as a cap and is warning-only
+  (`unconfirmedCapWarning()` in calculations.js) — never read it in dose math.
+- A clinical restriction that must never be hidden goes in `contraindication`,
+  which the Dosage tab and AnesthesiaRow render unconditionally. `warning` is
+  suppressed when the computed "Max N doses per 24 hours" line already says it,
+  so an age limit in `warning` can silently disappear.
 - Clinical reference tool: correctness > features > style.
 
 ## Commands

@@ -7,6 +7,7 @@ import {
   formatMl,
   formatMg,
   formatTablets,
+  unconfirmedCapWarning,
 } from "../calculations";
 import RxEditor from "./RxEditor";
 import FinalOutput from "../shared/FinalOutput";
@@ -73,6 +74,10 @@ export default function DosageCalculator({ onWeightKgChange }) {
 
   const showTablets = result?.tabletMg != null;
   const showLiquid = result?.volumeMl != null;
+  // Whether the "Max N doses per 24 hours" line is rendered. Used to decide if
+  // the drug's own warning would merely repeat it.
+  const perDayLimitShown = result?.maxDosesPerDay != null && result.maxDosesPerDay > 1;
+  const unconfirmedCap = unconfirmedCapWarning(selectedMed, result?.doseMg);
 
   // Build dose options in 1 mg steps from minDoseMg to maxDoseMg
   function getDoseOptions() {
@@ -263,9 +268,9 @@ export default function DosageCalculator({ onWeightKgChange }) {
         {result && (
           <section className="card results-card">
             <h2 className="section-title">
-              {result.adult ? "Adult Dose" : "Calculated Dose"}
+              {result.adultDoseApplied ? "Adult Dose" : "Calculated Dose"}
             </h2>
-            {result.adult && (
+            {result.adultDoseApplied && (
               <p className="adult-badge">Weight &gt;40 kg — using adult dose</p>
             )}
 
@@ -339,15 +344,25 @@ export default function DosageCalculator({ onWeightKgChange }) {
             </div>
 
             <div className="warnings">
-              {result.maxDosesPerDay != null && result.maxDosesPerDay > 1 && (
+              {perDayLimitShown && (
                 <p className="warning-text">⚠ Max {result.maxDosesPerDay} doses per 24 hours</p>
               )}
               {result.maxTabletsPerDay != null && (
                 <p className="warning-text">⚠ Max {result.maxTabletsPerDay} tablets per 24 hours</p>
               )}
-              {selectedMed?.warning && result.maxDosesPerDay == null && (
+              {/* The drug's own warning is hidden only when the computed line
+                  above already says it (Tylenol's "Max 5 doses per 24 hours").
+                  The old test — no per-day figure at all — also hid every
+                  single-dose warning, which silenced the mg/kg limit on all
+                  four local anesthetics, whose maxDosesPerDay is 1. */}
+              {selectedMed?.warning && !perDayLimitShown && (
                 <p className="warning-text">⚠ {selectedMed.warning}</p>
               )}
+              {/* Age restrictions are never suppressed by a computed limit. */}
+              {selectedMed?.contraindication && (
+                <p className="warning-text">⚠ {selectedMed.contraindication}</p>
+              )}
+              {unconfirmedCap && <p className="warning-text">⚠ {unconfirmedCap}</p>}
               {result.adult && selectedMed?.adultNote && (
                 <p className="warning-text info">ℹ {selectedMed.adultNote}</p>
               )}

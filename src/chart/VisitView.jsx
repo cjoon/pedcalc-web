@@ -1,7 +1,6 @@
 import { useMemo, useReducer, useState } from "react";
-import { VN_TEMPLATES } from "./data/visitTemplates";
-import { VN_EXTRA_OPTIONS } from "./data/visitOptions";
-import { OPTIONS, PH_LABELS } from "./data/dropdownOptions";
+import { VISITS } from "./data/visits";
+import { VISIT_OPTIONS, VISIT_LABELS } from "./data/fieldVocabulary";
 import { CDT_CODES } from "./data/cdtCodes";
 import { tokenizeVisit, flattenTokens } from "./tokenize";
 import { getPlainVisit } from "./serializer";
@@ -14,15 +13,13 @@ import DraftEditor from "../shared/DraftEditor";
 import FinalOutput from "../shared/FinalOutput";
 import "./chart.css";
 
-// Same merge the prototype performs at L1320: the Visit Note vocabulary wins
-// over the shared OPTIONS for keys both define ({complaint} is the notable one).
-const VISIT_FIELD_OPTIONS = {
-  options: { ...OPTIONS, ...VN_EXTRA_OPTIONS },
-  labels: PH_LABELS,
-};
+// Assembled in data/fieldVocabulary.js, which performs the same merge as the
+// prototype at L1320: the Visit Note vocabulary wins over the shared OPTIONS for
+// keys both define ({complaint} is the notable one).
+const VISIT_FIELD_OPTIONS = { options: VISIT_OPTIONS, labels: VISIT_LABELS };
 
 function findVisit(catKey, key, visitId) {
-  const item = VN_TEMPLATES[catKey]?.items[key];
+  const item = VISITS[catKey]?.items[key];
   if (!item) return null;
   const visit = item.visits.find((v) => v.id === visitId) ?? item.visits[0];
   return { item, visit };
@@ -98,7 +95,7 @@ export default function VisitView({ weightKg }) {
     <FieldOptionsContext.Provider value={VISIT_FIELD_OPTIONS}>
       <div className="chart">
         <Sidebar
-          templates={VN_TEMPLATES}
+          templates={VISITS}
           search={search}
           onSearch={setSearch}
           active={active}

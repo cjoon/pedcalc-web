@@ -1,5 +1,6 @@
 import { ANESTHETICS } from "./data/anesthetics";
-import { carpulesToMg, maxAllowedMg } from "./anesthesia";
+import { agentMedication, carpulesToMg, maxAllowedMg } from "./anesthesia";
+import { unconfirmedCapWarning } from "../calculations";
 
 // Not in the prototype — new per PLAN.md, a standalone calculator (separate
 // from the {anesthetic}/{dose} SOAP tokens) shown whenever a procedure uses
@@ -7,10 +8,15 @@ import { carpulesToMg, maxAllowedMg } from "./anesthesia";
 // shared weight before charting the free-text dose.
 export default function AnesthesiaRow({ anesthesia, onChange, weightKg }) {
   const agent = anesthesia.agentIdx != null ? ANESTHETICS[anesthesia.agentIdx] : null;
+  // Limits live in medications.js, reached through the agent's medicationId.
+  const med = anesthesia.agentIdx != null ? agentMedication(anesthesia.agentIdx) : null;
   const carpules = parseFloat(anesthesia.carpules);
   const mg = agent && Number.isFinite(carpules) && carpules > 0 ? carpulesToMg(anesthesia.agentIdx, carpules) : null;
   const max = agent && weightKg ? maxAllowedMg(anesthesia.agentIdx, weightKg) : null;
   const exceeded = mg != null && max != null && mg > max;
+  // Warn on the figure the clinician is being told they may go up to, not only
+  // on what they have entered so far.
+  const unconfirmedCap = unconfirmedCapWarning(med, max);
 
   return (
     <div className="anesthesia-row">
@@ -48,11 +54,14 @@ export default function AnesthesiaRow({ anesthesia, onChange, weightKg }) {
           {exceeded && " ⚠ exceeds max"}
         </div>
       )}
-      {agent && weightKg && !agent.maxMgPerKg && (
+      {agent && weightKg && !med?.dosePerKg && (
         <div className="anesthesia-note">
           Max dose for {agent.name} not yet confirmed — mg shown for reference only.
         </div>
       )}
+      {med?.warning && <div className="anesthesia-note">{med.warning}</div>}
+      {med?.contraindication && <div className="anesthesia-note">{med.contraindication}</div>}
+      {unconfirmedCap && <div className="anesthesia-note">{unconfirmedCap}</div>}
     </div>
   );
 }

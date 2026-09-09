@@ -1,16 +1,17 @@
 import { FACTORY_TEMPLATES } from "./initialTemplates.js";
-import { SO_OVERRIDES } from "./soOverrides.js";
-import { MULTI_FIELDS } from "./soOptions.js";
+import { SO_OVERRIDES } from "./chartOverrides.js";
+import { EXTRA_TEMPLATES } from "./extraTemplates.js";
+import { CHART_OPTIONS, CHART_LABELS } from "./fieldVocabulary.js";
+import { assert, validateText, mergeExtras } from "./templateBuild.js";
 
 // Imports carry explicit .js extensions so scripts/check-data-parity.mjs can
 // load this module under plain node, not just through Vite.
-// The procedure list the UI actually renders: the verbatim prototype data with
-// the S/O lines replaced by the multi-select versions. Everything else (name,
-// tag, version labels, A, P) is copied through untouched, and the checks below
+// The procedure list the Initial Chart tab actually renders: the verbatim
+// prototype data with the overridden S/O/A/P lines swapped in, plus the
+// procedures from extraTemplates.js. Everything an override does not name
+// (name, tag, version labels) is copied through untouched, and the checks below
 // fail loudly at module load if an override drifts out of sync.
-function assert(condition, message) {
-  if (!condition) throw new Error(`soOverrides.js: ${message}`);
-}
+const OVERRIDABLE_FIELDS = ["S", "O", "A", "P"];
 
 function buildTemplates() {
   const out = {};
@@ -21,35 +22,54 @@ function buildTemplates() {
       for (const versionId of Object.keys(overrides)) {
         assert(
           item.versions.some((v) => v.id === versionId),
-          `${catKey}/${itemKey}/${versionId} has no matching version in initialTemplates.js`
+          `chartOverrides.js: ${catKey}/${itemKey}/${versionId} has no matching version in initialTemplates.js`
         );
       }
       items[itemKey] = {
         ...item,
         versions: item.versions.map((version) => {
-          const override = overrides[version.id];
-          if (!override) return { ...version, P: [...version.P] };
-          const extraKeys = Object.keys(override).filter((k) => k !== "S" && k !== "O");
+          const override = overrides[version.id] ?? {};
+          const where = `chartOverrides.js: ${catKey}/${itemKey}/${version.id}`;
+          const extraKeys = Object.keys(override).filter((k) => !OVERRIDABLE_FIELDS.includes(k));
           assert(
             extraKeys.length === 0,
-            `${catKey}/${itemKey}/${version.id} may only override S and O (got ${extraKeys.join(", ")})`
+            `${where} may only override ${OVERRIDABLE_FIELDS.join(", ")} (got ${extraKeys.join(", ")})`
           );
-          for (const text of [override.S, override.O]) {
-            // Matches "{+ph}" and the optional form "{?+ph}" (see tokenize.js).
-            for (const match of text.matchAll(/\{[?]?\+([^}]+)\}/g)) {
-              assert(
-                MULTI_FIELDS[match[1]],
-                `${catKey}/${itemKey}/${version.id} references unknown multi-select group "${match[1]}"`
-              );
-            }
-          }
-          return { ...version, S: override.S, O: override.O, P: [...version.P] };
+          // A P override replaces the whole step list; there is no per-step merge.
+          assert(
+            override.P === undefined || Array.isArray(override.P),
+            `${where} P override must be an array of steps`
+          );
+          return {
+            ...version,
+            S: override.S ?? version.S,
+            O: override.O ?? version.O,
+            A: override.A ?? version.A,
+            P: [...(override.P ?? version.P)],
+          };
         }),
       };
     }
     out[catKey] = { ...cat, items };
   }
-  return out;
+  return mergeExtras(out, EXTRA_TEMPLATES);
 }
 
-export const TEMPLATES = buildTemplates();
+function validateTemplates(templates) {
+  for (const [catKey, cat] of Object.entries(templates)) {
+    for (const [itemKey, item] of Object.entries(cat.items)) {
+      for (const version of item.versions) {
+        const where = `${catKey}/${itemKey}/${version.id}`;
+        for (const field of ["S", "O", "A"]) {
+          validateText(version[field], `${where} ${field}`, CHART_OPTIONS, CHART_LABELS);
+        }
+        version.P.forEach((step, i) =>
+          validateText(step, `${where} P[${i}]`, CHART_OPTIONS, CHART_LABELS)
+        );
+      }
+    }
+  }
+  return templates;
+}
+
+export const TEMPLATES = validateTemplates(buildTemplates());

@@ -8,11 +8,23 @@ export function isFilled(value) {
   return Array.isArray(value) ? value.length > 0 : Boolean(value);
 }
 
+// An `ordered` group reads in the vocabulary's own order rather than the order
+// the boxes were ticked: a surface code is written "MOD", never "DMO". Custom
+// text that is not in the list keeps its relative position at the end.
+function inOptionOrder(value, options) {
+  const rank = (v) => {
+    const i = options.indexOf(v);
+    return i === -1 ? options.length : i;
+  };
+  return [...value].sort((a, b) => rank(a) - rank(b));
+}
+
 export function displayValue(ph, value) {
   if (!isFilled(value)) return "";
   const group = MULTI_FIELDS[ph];
   if (!Array.isArray(value)) return value;
+  const parts = group?.ordered ? inOptionOrder(value, group.options) : value;
   // prefix/suffix let an optional clause carry its own label and punctuation,
   // so the label disappears with the value instead of dangling in the sentence.
-  return `${group?.prefix ?? ""}${value.join(group?.sep ?? ", ")}${group?.suffix ?? ""}`;
+  return `${group?.prefix ?? ""}${parts.join(group?.sep ?? ", ")}${group?.suffix ?? ""}`;
 }

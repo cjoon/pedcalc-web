@@ -22,6 +22,11 @@ export function calculateDose(medication, weightKg, selectedFormulation, selecte
 
   const adult = isAdult(weightKg);
   const regimen = getEffectiveRegimen(medication, selectedRegimen, selectedFormulation);
+  // Whether the adult branch below actually replaced the weight-based figure.
+  // Weight-based agents (the local anesthetics) have no adult fixed dose, so
+  // they stay mg/kg at every weight and the UI must not call the result an
+  // "adult dose".
+  let adultDoseApplied = false;
 
   // Determine dosePerKg for this context
   let dosePerKg = medication.dosePerKg;
@@ -39,13 +44,18 @@ export function calculateDose(medication, weightKg, selectedFormulation, selecte
   // Adult dosing override
   if (adult) {
     if (dayDose) {
-      doseMg = dayDose.maxMg ?? doseMg;
+      if (dayDose.maxMg != null) {
+        doseMg = dayDose.maxMg;
+        adultDoseApplied = true;
+      }
     } else {
       const adultMax = regimen?.adultDoseMg ?? medication.adultDoseMg;
       if (adultMax) {
         doseMg = adultMax;
+        adultDoseApplied = true;
       } else if (selectedFormulation?.tabletMg && selectedFormulation?.maxTablets) {
         doseMg = selectedFormulation.tabletMg * selectedFormulation.maxTablets;
+        adultDoseApplied = true;
       }
     }
   } else {
@@ -114,8 +124,20 @@ export function calculateDose(medication, weightKg, selectedFormulation, selecte
     maxTabletsPerDay,
     frequency,
     adult,
+    adultDoseApplied,
     dispensingUnit: medication.dispensingUnit,
   };
+}
+
+// Some agents have a published per-appointment ceiling this app cannot adopt as
+// a hard cap because the sources disagree (mepivacaine: 300 mg vs the
+// manufacturer's 400 mg). The figures never enter the arithmetic — only
+// `absoluteMaxMg` does — so without this the calculation would hand back a
+// number above every published limit with nothing to say about it.
+export function unconfirmedCapWarning(medication, doseMg) {
+  const range = medication?.unconfirmedAbsoluteMaxMg;
+  if (!range || doseMg == null || doseMg <= range.lowMg) return null;
+  return `Above the published per-appointment range (${range.lowMg}–${range.highMg} mg), which is unconfirmed for this app — verify before administering`;
 }
 
 export function isCleanVolume(ml, unitVol) {

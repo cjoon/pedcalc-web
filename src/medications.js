@@ -109,6 +109,12 @@ export const medications = [
       { id: "day2plus", label: "Day 2+", dosePerKg: 5, maxMg: 250, frequency: "Once daily — Days 2–5" },
     ],
   },
+  // Injectable local anesthetics. mg/kg values are the AAPD Reference Manual
+  // 2025-2026 table (Best Practices: Use of Local Anesthesia), which AAPD sets
+  // more conservatively than the manufacturer's recommended dose. Cartridge
+  // volume is 1.7 mL there, matching CARPULE_ML in src/chart/anesthetics.js.
+  // These entries are the single source of truth for the chart's anesthesia
+  // dose check as well as the Dosage tab.
   {
     id: "lidocaine",
     name: "Lidocaine",
@@ -120,7 +126,67 @@ export const medications = [
     ],
     dispensingUnit: { label: "Carpule (1.7 mL)", volumeMl: 1.7 },
     frequency: "Single dose",
+    // 300 mg, not the manufacturer's 500 mg: the pediatric dental literature
+    // caps a single appointment at 300 mg, and AAPD's table gives mg/kg only.
+    // Only bites above ~68 kg, where 4.4 mg/kg would otherwise exceed it.
+    absoluteMaxMg: 300,
+    warning: "Max 4.4 mg/kg (2 mg/lb) with epinephrine; 300 mg per appointment",
+  },
+  {
+    id: "articaine",
+    name: "Articaine",
+    genericName: "Articaine 4% w/ Epi 1:100,000",
+    dosePerKg: 7,
+    concentration: 40,
+    formulationOptions: [
+      { label: "Carpule (1.7 mL)", mgPerMl: 40 },
+    ],
+    dispensingUnit: { label: "Carpule (1.7 mL)", volumeMl: 1.7 },
+    frequency: "Single dose",
+    // Manufacturer's absolute maximum (~7 cartridges). AAPD's table lists the
+    // mg/kg figure only, so this cap comes from the product labeling.
     absoluteMaxMg: 500,
-    warning: "Max 4.4 mg/kg (2 mg/lb) with epinephrine",
+    warning: "Max 7 mg/kg (3.2 mg/lb)",
+    // `contraindication` is rendered unconditionally by the Dosage tab, unlike
+    // `warning`, which is suppressed when a computed per-day limit says the same
+    // thing. An age restriction must never be the line that gets suppressed.
+    contraindication: "Not recommended under 4 years of age",
+  },
+  {
+    id: "mepivacaine",
+    name: "Mepivacaine",
+    genericName: "Mepivacaine 3% plain",
+    dosePerKg: 4.4,
+    concentration: 30,
+    formulationOptions: [
+      { label: "Carpule (1.7 mL)", mgPerMl: 30 },
+    ],
+    dispensingUnit: { label: "Carpule (1.7 mL)", volumeMl: 1.7 },
+    frequency: "Single dose",
+    // UNKNOWN: published absolute caps disagree (300 mg vs the manufacturer's
+    // 400 mg). Left out until CJ confirms, so only the mg/kg limit applies.
+    absoluteMaxMg: null,
+    warning: "Max 4.4 mg/kg (2 mg/lb). Absolute per-appointment cap unconfirmed",
+    // Never used in the arithmetic — `absoluteMaxMg` above is the only value the
+    // calculation reads. This records the two published figures so a result past
+    // the lower one is flagged instead of being presented without qualification
+    // (4.4 mg/kg alone reaches 308 mg at 70 kg). See unconfirmedCapWarning() in
+    // src/calculations.js.
+    unconfirmedAbsoluteMaxMg: { lowMg: 300, highMg: 400 },
+  },
+  {
+    id: "bupivacaine",
+    name: "Bupivacaine",
+    genericName: "Bupivacaine 0.5% w/ Epi 1:200,000",
+    dosePerKg: 1.3,
+    concentration: 5,
+    formulationOptions: [
+      { label: "Carpule (1.7 mL)", mgPerMl: 5 },
+    ],
+    dispensingUnit: { label: "Carpule (1.7 mL)", volumeMl: 1.7 },
+    frequency: "Single dose",
+    absoluteMaxMg: 90,
+    warning: "Max 1.3 mg/kg (0.6 mg/lb); 90 mg per appointment",
+    contraindication: "Not recommended under 12 years of age",
   },
 ];
