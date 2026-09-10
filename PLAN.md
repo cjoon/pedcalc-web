@@ -102,76 +102,63 @@ src/
 
 ## 구현 순서 — 단계마다 Codex 리뷰 게이트 통과 필수
 
-각 Phase는 **`npm run build`/`npm run lint` 통과 → Codex 리뷰(`/review`) → P0/P1 수정 →
-다음 Phase**의 순서로 진행한다. P2/P3는 보고만 하고 남겨둔다.
+각 Phase는 `npm run build`/`npm run lint` 통과 → Codex 리뷰(`/review`) → P0/P1 수정 →
+다음 Phase의 순서로 진행한다. P2/P3는 보고만 하고 남겨둔다. 완료 여부와 남은 작업은
+STATE.md가 최신 상태를 갖고 있으므로 여기서는 각 Phase에서 무엇을, 왜 그렇게 했는지만 남긴다.
 
 ### Phase 0 — 준비
-- [x] branch `feat/chart-templates` 생성
-- [x] `PLAN.md`·`PLAN_chartrx.md`를 이 문서로 통합, `PLAN_chartrx.md` 삭제
-- [x] Codex 리뷰: 문서 변경 확인
+branch `feat/chart-templates`를 만들고, 흩어져 있던 `PLAN.md`·`PLAN_chartrx.md`를 이 문서
+하나로 통합했다.
 
 ### Phase 1 — 데이터 이식
-- [x] `initialTemplates.js`: `FACTORY_TEMPLATES` 그대로 복사 (문구 변경 금지)
-- [x] `dropdownOptions.js`: `OPTIONS`, `PH_LABELS` 그대로 복사
-- [x] 파리티 검증 스크립트 `scripts/check-data-parity.mjs`: HTML의 해당 리터럴을 평가한 값과
-      모듈 export를 비교, 불일치 시 exit 1
-- [x] `cdtCodes.js`, `anesthetics.js`: 실제 procedure/agent 키로 뼈대만 작성. CJ 미제공 값(CDT
-      코드 전체, Articaine/Mepivacaine/Bupivacaine max mg/kg)은 빈 배열/`null`(UNKNOWN) —
-      추정하지 않음
-- [x] Codex 리뷰 → P0/P1 수정 (findings 없음, PASS)
+`initialTemplates.js`(`FACTORY_TEMPLATES`)와 `dropdownOptions.js`(`OPTIONS`, `PH_LABELS`)는
+프로토타입에서 문구 변경 없이 그대로 복사한다. `scripts/check-data-parity.mjs`가 HTML의 해당
+리터럴을 평가한 값과 모듈 export를 비교해 불일치 시 exit 1로 이 원칙을 지킨다.
+`cdtCodes.js`, `anesthetics.js`는 실제 procedure/agent 키로 뼈대만 만들고, CJ가 아직 주지
+않은 값(CDT 코드 전체, Articaine/Mepivacaine/Bupivacaine max mg/kg)은 빈 배열/`null`
+(UNKNOWN)로 두고 추정하지 않는다.
 
 ### Phase 2 — 셸 분리 (Dosage 회귀 없이)
-- [x] `App.jsx` 본문 → `dosage/DosageCalculator.jsx` 이동, 로직 변경 없음
-- [x] `App.css` → 셸 공통 + `dosage/dosage.css` 분리
-- [x] `App.jsx`: mode 상태 + Topbar 탭 + MobileNav
-- [x] Disclaimer 전체화면 게이트 제거, `disclaimerAccepted` 키 정리 (5항목을 상시 노출 푸터로 이전,
-      결과 카드 내 한 줄 문구도 안전상 유지 — Codex 리뷰에서 확인)
-- [x] 디자인 토큰: ChartRx 팔레트(`--bg #f4f2ec`, `--accent #0f5c4a`, `--amber #c4702a` 등) 적용
-- [x] `index.html` title → "ChartRx — Charting & Dosage"
-- **게이트:** `npm run build` exit 0, Dosage 회귀 검증 케이스 통과 → Codex 리뷰 (3라운드, 최종 PASS)
+기존 `App.jsx` 본문을 로직 변경 없이 `dosage/DosageCalculator.jsx`로 옮기고, `App.css`를
+셸 공통 스타일과 `dosage/dosage.css`로 분리했다. `App.jsx`는 mode 상태 + Topbar 탭 +
+MobileNav만 소유한다. Disclaimer는 전체화면 게이트 대신 상시 노출 푸터로 옮겼는데, 결과 카드
+안의 한 줄 문구는 안전상 남겨뒀다(Codex 리뷰로 확인). 디자인은 ChartRx 팔레트
+(`--bg #f4f2ec`, `--accent #0f5c4a`, `--amber #c4702a` 등)로 통일하고 `index.html` title도
+"ChartRx — Charting & Dosage"로 바꿨다. 게이트는 build exit 0 + Dosage 회귀 검증 케이스
+통과 + Codex 리뷰(3라운드 끝에 최종 PASS)였다.
 
 ### Phase 3 — Initial Chart
-- [x] `Sidebar.jsx`: 카테고리 헤더, 검색 필터, 버전 pill
-- [x] `ChartCard.jsx` + `SoapRow.jsx`, `{ph}` → `FieldToken`
-- [x] `FieldToken.jsx`: amber 버튼 + Tab 이동 (신규 기능 — 네이티브 `<button>` + `:focus-visible`)
-- [x] 빈 상태/힌트 문구는 프로토타입 원문 그대로
-- [x] `FieldDropdown.jsx`: 옵션 + Custom 입력, ↑↓/Enter/Esc, 화면 밖 뒤집기, 모바일 bottom sheet
-- [x] `ToothSelector.jsx`: 다중 선택, 값 `teeth.join(", #")`. 선택 0개로도 Apply 가능(필드 개별 삭제)
-- [x] `AnesthesiaRow.jsx`: 마취제/carpule → mg 환산, 체중 대비 max 초과 시 경고. `weightKg`를
-      `App.jsx`로 끌어올려 Dosage 탭과 공유(Phase 2에서 보류했던 항목, Codex P2로 재확인 후 처리)
-- [x] `CdtRow.jsx`: 기본 CDT 코드 칩 + 추가/삭제
-- [x] `serializer.js`: 프로토타입 `getPlainChart` 포맷 + 마지막 CDT 줄
-- [x] Copy(`navigator.clipboard.writeText` + toast), 모바일 패널 전환, 44px 터치 타겟
-- **게이트:** build/lint 통과 + 검증 케이스(Playwright로 브라우저 실사용 확인) → Codex 리뷰
-  (3라운드 — Custom 입력 버블링, 모바일 bottom sheet, 음수 carpule, 치아 삭제 불가 수정 후 최종 PASS)
-- **보류(v1.2 이후):** `useChartData.js`/`storage.js` — MVP는 템플릿 편집(Settings) 기능이 없어
-  저장할 대상이 없음. Settings 붙일 때 추가
+`Sidebar.jsx`(카테고리 헤더, 검색 필터, 버전 pill), `ChartCard.jsx`/`SoapRow.jsx`(`{ph}` →
+`FieldToken`), `FieldToken.jsx`(amber 버튼 + Tab 이동 — 프로토타입엔 없던 신규 기능, 네이티브
+`<button>` + `:focus-visible`로 구현)로 카드를 만들었다. 빈 상태·힌트 문구는 프로토타입 원문
+그대로 유지. `FieldDropdown.jsx`는 옵션 + Custom 입력, ↑↓/Enter/Esc, 화면 밖이면 위로 뒤집기,
+모바일에서는 bottom sheet. `ToothSelector.jsx`는 다중 선택이고 값은 `teeth.join(", #")`,
+선택 0개로도 Apply가 되어 필드를 개별 삭제할 수 있게 했다. `AnesthesiaRow.jsx`는 마취제·carpule
+→ mg 환산과 체중 대비 max 초과 경고를 보여주는데, 이때 `weightKg`를 `App.jsx`로 끌어올려
+Dosage 탭과 공유하도록 했다(Phase 2에서 보류했던 항목, Codex P2로 재확인 후 처리). `CdtRow.jsx`는
+기본 CDT 코드 칩과 추가/삭제, `serializer.js`는 프로토타입 `getPlainChart` 포맷에 마지막 CDT
+줄만 더했다. Copy는 `navigator.clipboard.writeText` + toast, 터치 타겟은 44px. 게이트는
+build/lint + Playwright로 브라우저 실사용 확인 + Codex 리뷰(3라운드 — Custom 입력 버블링,
+모바일 bottom sheet, 음수 carpule, 치아 삭제 불가를 고쳐 최종 PASS). `useChartData.js`/
+`storage.js`는 MVP에 템플릿 편집(Settings) 기능이 없어 저장할 대상이 없으므로 v1.2로 보류했다.
 
 ### Phase 4 — 문서 마무리
-- [x] `CLAUDE.md`/`AGENTS.md` File Map을 실제 구조로 갱신
-- [x] Domain Rules에 추가: 템플릿 문구 VERBATIM 이식 원칙, PHI 필드 금지, 마취 최대 용량
-      단일 소스(`medications.js`) 유지
-- [ ] Codex 리뷰 → 최종 확인
+`CLAUDE.md`/`AGENTS.md` File Map을 실제 구조로 갱신하고, Domain Rules에 템플릿 문구 VERBATIM
+이식 원칙·PHI 필드 금지·마취 최대 용량 단일 소스(`medications.js`) 유지를 추가했다.
 
 ### Phase 5 — 편집/확정 단계, Suture, 처방, S/O 다중선택 (2026-09-06 요청)
-
-CJ 요청 4건. 작업 브랜치 `feat/review-flow`.
-
-- [x] 5a: `src/shared/DraftEditor.jsx` / `FinalOutput.jsx` + Chart의 fill → edit → final 단계.
-      Copy는 final 단계에서만. Next는 항상 토큰 값에서 초안을 재생성(자유 편집분은 버림)
-- [x] 5b: `useAnchoredPopover.js`로 팝오버 위치/닫기 로직 공통화 → `SutureSelector.jsx`
-      (굵기 3-0~6-0 + 재질 7종, CJ 확정 목록, 값 형식 `4-0 silk`). `OPTIONS.suture`는 미수정
-- [x] 5c: Dosage 탭 calc → rx → final. `rx.js`(초안·텍스트 생성, 용량 계산 없음),
-      `rxOptions.js`(route/frequency/refills), `RxEditor.jsx`. final에서 복사/인쇄.
-      주사제(카풀 계량)는 route 기본값 공란 — "by mouth" 오기재 방지
-- [x] 5d: `{+ph}` 다중선택 토큰(`tokenize.js`, `fieldValue.js`, `MultiSelectDropdown.jsx`),
-      `soOptions.js`(16 그룹 219 항목), `soOverrides.js`(32 version S/O 전부),
-      `templates.js`(FACTORY_TEMPLATES + 오버레이, 불일치 시 throw).
-      parity 스크립트에 "S/O 외 전부 동일" 검사 추가
-- [x] 5e: CLAUDE.md/AGENTS.md File Map·Domain Rules, PLAN.md 갱신
-- [ ] Codex 리뷰 → P0/P1 수정
-- **CJ 검토 대기:** `src/chart/data/soOptions.js`의 소견 어휘, `src/dosage/rxOptions.js`의
-      sig 문구. 둘 다 임상 문구일 뿐 용량 데이터가 아님
+CJ 요청 4건, 작업 브랜치 `feat/review-flow`. `src/shared/DraftEditor.jsx`/`FinalOutput.jsx`로
+Chart에 fill → edit → final 단계를 만들었고, Copy는 final 단계에서만 가능하며 Next는 항상
+토큰 값에서 초안을 재생성한다(자유 편집분은 버림). `useAnchoredPopover.js`로 팝오버 위치·닫기
+로직을 공통화해 `SutureSelector.jsx`(굵기 3-0~6-0 + 재질 7종, CJ 확정 목록, 값 형식
+`4-0 silk`)를 만들었다(`OPTIONS.suture`는 손대지 않음). Dosage 탭에도 calc → rx → final
+흐름을 넣었다: `rx.js`는 초안·텍스트만 만들고 용량 계산은 하지 않으며, `rxOptions.js`
+(route/frequency/refills)와 `RxEditor.jsx`로 편집, final에서 복사/인쇄한다. 주사제(카풀
+계량)는 route 기본값을 공란으로 둬서 "by mouth" 오기재를 막는다. `{+ph}` 다중선택 토큰
+(`tokenize.js`, `fieldValue.js`, `MultiSelectDropdown.jsx`)과 `soOptions.js`(16 그룹 219
+항목), 그리고 32개 version의 S/O를 전부 다시 쓴 `soOverrides.js`를 더해 `templates.js`가
+FACTORY_TEMPLATES + 오버레이를 합치고 불일치 시 throw하도록 했다. parity 스크립트에
+"S/O 외 전부 동일" 검사도 추가했다.
 
 ---
 
