@@ -24,6 +24,8 @@ Stack: React 19 + Vite, plain CSS, no state library. Session-only patient data.
 | 2026-09-08 | (pending) | Template audit: A/P + Visit Note override layers, vocabulary cleanup, 6 new procedures, AAPD anesthetic limits |
 | 2026-09-09 | `ce987c7` | Template audit shipped and deployed |
 | 2026-09-09 | (pending) | Procedure selection shared across the two chart tabs |
+| 2026-09-09 | `63a4780` | Shared procedure selection shipped and deployed |
+| 2026-09-09 | (pending) | Mepivacaine cap sourced, override paths validated, Visit Note A lines, empty blanks dropped |
 
 ### What the last three commits added
 
@@ -165,16 +167,73 @@ falls back to the empty state, a filled tooth number does not survive a
 cross-tab procedure change (0/8 filled on arrival), and the console stays clean —
 in particular no "Too many re-renders" from the render-time sync.
 
+### Empty blanks, override validation, Visit Note A lines (2026-09-09)
+
+**Empty blanks leave the note instead of printing `[anesthetic]`.** `serializer.js`
+gained `tidy()` and `isEmptyStep()`: a removed blank takes its stranded
+punctuation with it, the `#` of an unfilled tooth number goes, a unit written
+straight after a blank (`{pd}mm`, `{boneloss}%`, `{torque}Ncm`) goes with the
+number, and a plan step left as a bare label (`LA:`) is dropped rather than
+printed. A step that still carries an instruction is kept, because its words came
+from the template rather than from a blank. Unit removal happens on the token
+parts, where a unit is still visibly attached to its blank, not on the joined
+string.
+
+Rendering happens clause by clause, split on "." and ";", because by the time the
+line is a single string it is too late to tell which label belonged to which
+blank. A clause whose blanks are all empty is dropped when what is left cannot
+stand on its own: punctuation, a bare label ("PA:", "Vitality:"), or a phrase cut
+off at the preposition that introduced the blank ("Px c/o", "premature loss of").
+A clause that still carries an instruction is kept. Checked against all 32
+procedures and 56 visits with nothing filled: no dangling fragment survives, and
+across 285 fully filled lines the output is unchanged.
+
+Deleting a required blank silently would be the wrong trade in a clinical note,
+so the edit step now names them: "Left empty, so not in the note: Probing depth
+(mm), Interdental CAL…". Non-blocking, and the draft is editable anyway. This was
+the open question the previous entry said to settle with CJ; the notice answers
+both halves of it without a modal.
+
+The Visit-Note-only blanks had no names to report — the prototype ships their
+lists but not their labels — so the notice read "pa, vitality".
+`VISIT_LABEL_OVERRIDES` names all 23, and renames `{complaint}`, which the shared
+label calls "Ortho complaint" while the Visit Note list is general symptoms.
+
+The Rx step's `Disp: ________` is deliberately unchanged. An underscore rule is
+the conventional "write it in" marker on a printed prescription, and `Disp:` with
+nothing after it would be worse.
+
+**Override paths are validated in both directions.** The builders walk the
+factory data and look up an override, so an override filed under a misspelled
+category, item or version id was ignored in silence — nothing failed and the
+wording simply never reached the note (Codex P2). `validateOverridePaths()` now
+checks the other direction at load; a typo at any of the three levels throws.
+
+**Visit Note A lines.** Most were already right: a follow-up appointment's
+assessment states what that visit was for, and the diagnosis belongs to the
+workup. The plan's estimate of 42 mechanical conversions was wrong. Two cases
+needed changing — a line that asserts a diagnosis that may be false (checkup's
+"Healthy dentition."), and a procedure's first visit that records only what was
+done with no diagnosis anywhere. That is 13 more lines, all reusing Initial Chart
+vocabulary; declared Visit Note overrides went from 9 to 22. Removable pros
+(edentulism) and frenectomy (aberrant frenum attachment) were left alone rather
+than forced into an approximate category — they need vocabulary that does not
+exist yet.
+
 ### Awaiting CJ's clinical review
 
 - `src/dosage/rxOptions.js` — sig wording (routes, frequencies, refills).
 - `src/chart/data/cdtCodes.js` — still empty per procedure. UNKNOWN until CJ
   provides the mapping; nothing is guessed.
-- Mepivacaine's absolute per-appointment cap is still UNKNOWN (`absoluteMaxMg:
-  null` in `src/medications.js`): published values disagree, 300 mg vs the
-  manufacturer's 400 mg. Only the 4.4 mg/kg limit applies, so the figure passes
-  300 mg at 70 kg; `unconfirmedAbsoluteMaxMg` makes both tabs warn above that
-  instead of adopting either value. CJ picking one closes it.
+- Mepivacaine's per-appointment cap is still UNKNOWN and `absoluteMaxMg` stays
+  `null`, because AAPD is this app's source of record for maximum doses and its
+  table has no absolute column. The search did settle what exists: the FDA label
+  for Carbocaine (2018) says a single dose, or the total of a series in one
+  procedure, "should not usually exceed 400 mg" in healthy normal-sized adults,
+  and the widely repeated pediatric 300 mg could not be traced to any primary
+  source. That 400 mg is carried as `unconfirmedAbsoluteMaxMg` and only warns —
+  it never caps the arithmetic. **CJ decides:** adopt 400 mg as the cap, or leave
+  it warning-only.
 - The CDT 2026 candidate mapping per procedure is written up in the plan file
   (`~/.claude/plans/luminous-bouncing-zephyr.md`) but deliberately NOT applied —
   `cdtCodes.js` stays empty per the UNKNOWN rule.
@@ -213,11 +272,10 @@ resolved."). Two visits have all three lines as pure prose.
 **Order of work.** Diagnosis first, then findings, then the follow-up wording —
 each stage is independently shippable and reviewable.
 
-1. **A lines (42 remaining).** Reuse the vocabulary the Initial Chart already
-   has: `restoDx`, `pulpalDx` + `periapicalDx`, `perioDx` + `perioStatus`,
-   `examDx`, `tmdDx`, `surgDx`, `implantSite`. Mostly mechanical — the groups are
-   written and CJ-reviewable already. Watch for the visits whose A is a procedure
-   statement, not a diagnosis ("#{tooth} crown delivery."); those stay.
+1. **A lines — done 2026-09-09.** 13 lines converted, the rest are procedure
+   statements that are correct as written. See the entry above. What is still
+   open: removable pros and frenectomy need diagnosis vocabulary that does not
+   exist yet (edentulism, aberrant frenum attachment).
 2. **O lines (49 remaining).** Needs one new group per follow-up theme, which is
    the part that does not exist yet:
    - `healingFindings` — the recurring post-op check ("Tissue: {tissue}",
@@ -258,46 +316,12 @@ rising), then chairside: pick each converted visit, confirm every blank has a
 list, fill it, copy the note and read it for grammar where a group's separator
 meets the surrounding punctuation.
 
-### 2. Drop unfilled blanks when advancing a step
-
-**Today:** pressing `Next` serializes an unfilled required blank as a literal
-`[anesthetic]` placeholder, so the draft carries bracket text the clinician has
-to delete by hand. Only blanks written as `{?+ph}` disappear on their own.
-
-**Wanted:** advancing to the edit step removes every blank left empty, whether
-or not it is marked optional, and tidies what is left behind.
-
-Points to settle before building it:
-
-- **Punctuation and spacing.** Removing a blank mid-sentence leaves stray
-  commas, semicolons and doubled spaces. `serializer.js` already collapses
-  whitespace; it needs a pass that also drops orphaned separators and a space
-  before `.` `,` `;`.
-- **Whole lines.** A plan step such as `LA: {anesthetic} {dose}` with both
-  blanks empty should drop the entire bullet, not print `LA:`.
-- **Required blanks.** Silently deleting a blank the clinician meant to fill is
-  a real risk in a clinical note. Options: show a confirmation listing what will
-  be dropped, or keep `[ph]` for a small set of genuinely required blanks.
-  Decide with CJ before implementing.
-- **Counter.** `filled/total` counts required blanks only; that logic already
-  exists in `ChartView.jsx` and should drive whatever warning is shown.
-
-Same behavior applies to the Rx step, where an empty `Disp` currently prints
-`________`.
-
-### 3. Smaller items
+### 2. Smaller items
 
 - Mobile (375px): the chart topbar title overlaps the `0/10 filled` counter.
   Pre-existing layout bug, not caused by the recent work.
 - Visit Note S/O/A are still largely the prototype's fixed sentences. Planned as
   its own round — see "Visit Note vocabulary conversion" below.
-- `templates.js` / `visits.js` validate overrides only in the factory direction:
-  they walk the prototype items and look up an override for each. A category or
-  item key misspelled in `chartOverrides.js` / `vnOverrides.js` is therefore
-  ignored in silence, and both module-load validation and the parity script still
-  pass — the intended clinical wording just never reaches the note. A reverse
-  check (every override path must exist in the factory data) would close it.
-  Codex P2, 2026-09-09.
 - From PLAN.md: Settings with template editing and export/import (v1.2),
   PWA (v2.0).
 - Visit Note step editing: the prototype let you drag steps to reorder, add and

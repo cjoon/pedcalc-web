@@ -4,7 +4,7 @@ import { VISIT_OPTIONS, VISIT_LABELS } from "./data/fieldVocabulary";
 import { CDT_CODES } from "./data/cdtCodes";
 import { tokenizeVisit, flattenTokens } from "./tokenize";
 import { getPlainVisit } from "./serializer";
-import { isFilled } from "./fieldValue";
+import { fieldLabel, isFilled } from "./fieldValue";
 import { cardReducer, initialCard } from "./cardReducer";
 import { FieldOptionsContext } from "./FieldOptionsContext";
 import Sidebar from "./Sidebar";
@@ -81,6 +81,18 @@ export default function VisitView({ weightKg, procedure, onSelectProcedure }) {
   );
   const totalFields = requiredIds.length;
   const filledFields = requiredIds.filter((id) => isFilled(card.fieldValues[id])).length;
+  // Named so the edit step can say what was dropped. Deduplicated: {tooth}
+  // appears several times in a note but is one blank to the clinician.
+  const droppedLabels = useMemo(
+    () => [
+      ...new Set(
+        flatTokens
+          .filter((p) => p.type === "field" && !p.optional && !isFilled(card.fieldValues[p.id]))
+          .map((p) => fieldLabel(p.ph, VISIT_LABELS))
+      ),
+    ],
+    [flatTokens, card.fieldValues]
+  );
 
   function selectVisit(catKey, key, visitId) {
     // null when the sidebar row was clicked rather than a visit pill or a tab in
@@ -152,6 +164,7 @@ export default function VisitView({ weightKg, procedure, onSelectProcedure }) {
                 onChange={setDraftText}
                 onBack={() => setStep("fill")}
                 onDone={() => setStep("final")}
+              dropped={droppedLabels}
                 hint="Edit freely. Going back and pressing Next again rebuilds this from the blanks."
               />
             )}

@@ -34,6 +34,28 @@ export function validateText(text, where, options, labels) {
   }
 }
 
+// The reverse of the builders' own lookup: they walk the factory data and ask
+// for an override, so an override filed under a category or item key that does
+// not exist is simply never consulted. Nothing failed, and the clinical wording
+// it was meant to apply just never reached the note. Checking the other
+// direction turns that typo into a load-time error.
+export function validateOverridePaths(overrides, factory, fileName, subKey) {
+  for (const [catKey, cat] of Object.entries(overrides)) {
+    const factoryCat = factory[catKey];
+    assert(factoryCat, `${fileName}: category "${catKey}" does not exist in the prototype data`);
+    for (const [itemKey, item] of Object.entries(cat)) {
+      const factoryItem = factoryCat.items[itemKey];
+      assert(factoryItem, `${fileName}: ${catKey}/${itemKey} does not exist in the prototype data`);
+      for (const subId of Object.keys(item)) {
+        assert(
+          factoryItem[subKey].some((v) => v.id === subId),
+          `${fileName}: ${catKey}/${itemKey}/${subId} does not exist in the prototype data`
+        );
+      }
+    }
+  }
+}
+
 // Adds the categories and items of `extras` to `base`. New categories are taken
 // whole; a category that already exists gains only its new items. Reusing a
 // factory item key is rejected: an addition must never silently shadow the

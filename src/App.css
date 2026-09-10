@@ -214,6 +214,15 @@ body {
   box-shadow: 0 0 0 3px var(--highlight-bg);
 }
 
+/* Says which blanks were left empty and so are absent from the draft. Uses the
+   same warning colour as the anesthesia over-max readout. */
+.step-warning {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--warning);
+  text-align: center;
+}
+
 .step-hint {
   margin-top: 8px;
   font-size: 11.5px;

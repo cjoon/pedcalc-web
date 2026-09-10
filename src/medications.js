@@ -163,16 +163,19 @@ export const medications = [
     ],
     dispensingUnit: { label: "Carpule (1.7 mL)", volumeMl: 1.7 },
     frequency: "Single dose",
-    // UNKNOWN: published absolute caps disagree (300 mg vs the manufacturer's
-    // 400 mg). Left out until CJ confirms, so only the mg/kg limit applies.
+    // UNKNOWN, and stays that way until CJ says otherwise: AAPD is this app's
+    // source of record for maximum doses and its table has no absolute column,
+    // so there is no AAPD per-appointment figure for mepivacaine to apply.
     absoluteMaxMg: null,
-    warning: "Max 4.4 mg/kg (2 mg/lb). Absolute per-appointment cap unconfirmed",
-    // Never used in the arithmetic — `absoluteMaxMg` above is the only value the
-    // calculation reads. This records the two published figures so a result past
-    // the lower one is flagged instead of being presented without qualification
-    // (4.4 mg/kg alone reaches 308 mg at 70 kg). See unconfirmedCapWarning() in
-    // src/calculations.js.
-    unconfirmedAbsoluteMaxMg: { lowMg: 300, highMg: 400 },
+    warning: "Max 4.4 mg/kg (2 mg/lb). No AAPD per-appointment cap published",
+    // Warning-only, never read by the calculation. The FDA label for Carbocaine
+    // (2018) states a single dose, or the total of a series in one procedure,
+    // "should not usually exceed 400 mg" in healthy normal-sized adults — an
+    // adult manufacturer figure, which is why it is not adopted as a cap here.
+    // The widely repeated pediatric 300 mg could not be traced to a primary
+    // source. Without this, 4.4 mg/kg alone would hand back 528 mg at 120 kg
+    // with nothing said about it.
+    unconfirmedAbsoluteMaxMg: { mg: 400, source: "FDA label for adults" },
   },
   {
     id: "bupivacaine",

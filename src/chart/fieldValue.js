@@ -1,4 +1,4 @@
-import { MULTI_FIELDS } from "./data/soOptions";
+import { MULTI_FIELDS } from "./data/soOptions.js";
 
 // A field value is a string for a normal {ph} blank and an array of selected
 // findings for a multi-select {+ph} blank. These helpers keep the difference in
@@ -17,6 +17,13 @@ function inOptionOrder(value, options) {
     return i === -1 ? options.length : i;
   };
   return [...value].sort((a, b) => rank(a) - rank(b));
+}
+
+// The human name for a blank: multi-select groups carry their own label, the
+// rest read the tab's PH_LABELS. Used to tell the clinician which blanks were
+// left empty and therefore dropped from the draft.
+export function fieldLabel(ph, labels) {
+  return MULTI_FIELDS[ph]?.label ?? labels?.[ph] ?? ph;
 }
 
 export function displayValue(ph, value) {

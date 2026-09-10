@@ -129,15 +129,14 @@ export function calculateDose(medication, weightKg, selectedFormulation, selecte
   };
 }
 
-// Some agents have a published per-appointment ceiling this app cannot adopt as
-// a hard cap because the sources disagree (mepivacaine: 300 mg vs the
-// manufacturer's 400 mg). The figures never enter the arithmetic — only
-// `absoluteMaxMg` does — so without this the calculation would hand back a
-// number above every published limit with nothing to say about it.
+// A published per-appointment ceiling this app does not adopt as a cap, because
+// it is not from the source of record (see mepivacaine in medications.js). It
+// never enters the arithmetic — only `absoluteMaxMg` does — so this is what
+// keeps an uncapped weight-based figure from being presented unqualified.
 export function unconfirmedCapWarning(medication, doseMg) {
-  const range = medication?.unconfirmedAbsoluteMaxMg;
-  if (!range || doseMg == null || doseMg <= range.lowMg) return null;
-  return `Above the published per-appointment range (${range.lowMg}–${range.highMg} mg), which is unconfirmed for this app — verify before administering`;
+  const cap = medication?.unconfirmedAbsoluteMaxMg;
+  if (!cap || doseMg == null || doseMg <= cap.mg) return null;
+  return `Above the ${cap.mg} mg per-appointment maximum in the ${cap.source}, which is not applied as a cap here — verify before administering`;
 }
 
 export function isCleanVolume(ml, unitVol) {

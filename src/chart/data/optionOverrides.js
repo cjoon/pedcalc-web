@@ -69,6 +69,38 @@ export const OPTION_OVERRIDES = {
   n2oMin: ["15", "20", "30", "45", "60"],
 };
 
+// Labels for the Visit-Note-only keys in visitOptions.js, which ships lists but
+// no names for them. Without these the "left empty, so not in the note" notice
+// falls back to the raw token ("pa", "vitality"). {complaint} is a rename rather
+// than an addition: the shared label calls it "Ortho complaint", but the Visit
+// Note list is general symptoms.
+export const VISIT_LABEL_OVERRIDES = {
+  complaint: "Complaint",
+  pa: "Periapical radiograph",
+  vitality: "Vitality test",
+  diagnosis: "Diagnosis",
+  pain: "Pain score (0–10)",
+  ohi: "Oral hygiene instruction",
+  cariesRisk: "Caries risk",
+  response: "Treatment response",
+  plaque: "Plaque score (%)",
+  prevPD: "Previous probing depth (mm)",
+  coverage: "Root coverage (%)",
+  ktGain: "Keratinized tissue gain (mm)",
+  boneSound: "Bone sounding (mm)",
+  asa: "ASA physical status",
+  isq: "ISQ",
+  tissue: "Tissue condition",
+  membraneStatus: "Membrane status",
+  tacks: "Fixation",
+  buccal: "Buccal plate",
+  elastics: "Elastics",
+  healing: "Healing",
+  flap: "Flap design",
+  newRec: "Residual recession (mm)",
+  adjustments: "Splint adjustments",
+};
+
 // PH_LABELS additions/replacements, merged the same way. The prototype labels
 // stay verbatim in dropdownOptions.js.
 export const LABEL_OVERRIDES = {

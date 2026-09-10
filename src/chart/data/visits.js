@@ -2,7 +2,7 @@ import { VN_TEMPLATES } from "./visitTemplates.js";
 import { VN_OVERRIDES } from "./vnOverrides.js";
 import { EXTRA_VISITS } from "./extraTemplates.js";
 import { VISIT_OPTIONS, VISIT_LABELS } from "./fieldVocabulary.js";
-import { assert, validateText, mergeExtras } from "./templateBuild.js";
+import { assert, validateText, mergeExtras, validateOverridePaths } from "./templateBuild.js";
 
 // The procedure list the Visit Note tab actually renders: VN_TEMPLATES verbatim
 // with the overridden lines swapped in, plus the visits from extraTemplates.js.
@@ -12,17 +12,12 @@ import { assert, validateText, mergeExtras } from "./templateBuild.js";
 const OVERRIDABLE_VISIT_FIELDS = ["S", "O", "A", "steps", "outcome", "next"];
 
 function buildVisits() {
+  validateOverridePaths(VN_OVERRIDES, VN_TEMPLATES, "vnOverrides.js", "visits");
   const out = {};
   for (const [catKey, cat] of Object.entries(VN_TEMPLATES)) {
     const items = {};
     for (const [itemKey, item] of Object.entries(cat.items)) {
       const overrides = VN_OVERRIDES[catKey]?.[itemKey] ?? {};
-      for (const visitId of Object.keys(overrides)) {
-        assert(
-          item.visits.some((v) => v.id === visitId),
-          `vnOverrides.js: ${catKey}/${itemKey}/${visitId} has no matching visit in visitTemplates.js`
-        );
-      }
       items[itemKey] = {
         ...item,
         visits: item.visits.map((visit) => {

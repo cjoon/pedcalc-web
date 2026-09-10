@@ -2,7 +2,7 @@ import { FACTORY_TEMPLATES } from "./initialTemplates.js";
 import { SO_OVERRIDES } from "./chartOverrides.js";
 import { EXTRA_TEMPLATES } from "./extraTemplates.js";
 import { CHART_OPTIONS, CHART_LABELS } from "./fieldVocabulary.js";
-import { assert, validateText, mergeExtras } from "./templateBuild.js";
+import { assert, validateText, mergeExtras, validateOverridePaths } from "./templateBuild.js";
 
 // Imports carry explicit .js extensions so scripts/check-data-parity.mjs can
 // load this module under plain node, not just through Vite.
@@ -14,17 +14,12 @@ import { assert, validateText, mergeExtras } from "./templateBuild.js";
 const OVERRIDABLE_FIELDS = ["S", "O", "A", "P"];
 
 function buildTemplates() {
+  validateOverridePaths(SO_OVERRIDES, FACTORY_TEMPLATES, "chartOverrides.js", "versions");
   const out = {};
   for (const [catKey, cat] of Object.entries(FACTORY_TEMPLATES)) {
     const items = {};
     for (const [itemKey, item] of Object.entries(cat.items)) {
       const overrides = SO_OVERRIDES[catKey]?.[itemKey] ?? {};
-      for (const versionId of Object.keys(overrides)) {
-        assert(
-          item.versions.some((v) => v.id === versionId),
-          `chartOverrides.js: ${catKey}/${itemKey}/${versionId} has no matching version in initialTemplates.js`
-        );
-      }
       items[itemKey] = {
         ...item,
         versions: item.versions.map((version) => {

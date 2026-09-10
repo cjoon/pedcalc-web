@@ -1,9 +1,10 @@
 import { useMemo, useReducer, useState } from "react";
 import { TEMPLATES } from "./data/templates";
 import { CDT_CODES } from "./data/cdtCodes";
+import { CHART_LABELS } from "./data/fieldVocabulary";
 import { tokenizeVersion, flattenTokens } from "./tokenize";
 import { getPlainChart } from "./serializer";
-import { isFilled } from "./fieldValue";
+import { fieldLabel, isFilled } from "./fieldValue";
 import { cardReducer, initialCard } from "./cardReducer";
 import Sidebar from "./Sidebar";
 import ChartCard from "./ChartCard";
@@ -72,6 +73,18 @@ export default function ChartView({ weightKg, procedure, onSelectProcedure }) {
   );
   const totalFields = requiredIds.length;
   const filledFields = requiredIds.filter((id) => isFilled(card.fieldValues[id])).length;
+  // Named so the edit step can say what was dropped. Deduplicated: {tooth}
+  // appears several times in a note but is one blank to the clinician.
+  const droppedLabels = useMemo(
+    () => [
+      ...new Set(
+        flatTokens
+          .filter((p) => p.type === "field" && !p.optional && !isFilled(card.fieldValues[p.id]))
+          .map((p) => fieldLabel(p.ph, CHART_LABELS))
+      ),
+    ],
+    [flatTokens, card.fieldValues]
+  );
 
   // Records the version for this procedure, then hands the procedure up to App.
   // The card reset is the block above, so re-picking the procedure already open
@@ -154,6 +167,7 @@ export default function ChartView({ weightKg, procedure, onSelectProcedure }) {
               onChange={setDraftText}
               onBack={() => setStep("fill")}
               onDone={() => setStep("final")}
+              dropped={droppedLabels}
               hint="Edit freely. Going back and pressing Next again rebuilds this from the blanks."
             />
           )}

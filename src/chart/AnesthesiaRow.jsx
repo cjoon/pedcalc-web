@@ -14,8 +14,8 @@ export default function AnesthesiaRow({ anesthesia, onChange, weightKg }) {
   const mg = agent && Number.isFinite(carpules) && carpules > 0 ? carpulesToMg(anesthesia.agentIdx, carpules) : null;
   const max = agent && weightKg ? maxAllowedMg(anesthesia.agentIdx, weightKg) : null;
   const exceeded = mg != null && max != null && mg > max;
-  // Warn on the figure the clinician is being told they may go up to, not only
-  // on what they have entered so far.
+  // Judged on the maximum the clinician is being shown, not only on what they
+  // have entered so far — that is the number they would dose up to.
   const unconfirmedCap = unconfirmedCapWarning(med, max);
 
   return (

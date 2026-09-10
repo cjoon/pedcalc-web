@@ -25,12 +25,42 @@
 //
 // The {dose} cartridge-volume fix that every LA step needs arrives through
 // optionOverrides.js instead, so no step list is overridden here.
+//
+// 2026-09-09, A-line round. Most Visit Note assessments are correct as written:
+// a follow-up appointment's A is a statement of what that visit was for ("crown
+// delivery", "Post-op review", "Membrane removal"), and the diagnosis belongs to
+// the workup, not repeated at every recall. Two cases are not:
+//
+//   (a) the line asserts a diagnosis that may be wrong — checkup's "Healthy
+//       dentition." regardless of what the exam found;
+//   (b) it is a procedure's FIRST visit and the note records only what was done,
+//       with no diagnosis anywhere — the visit where the treatment is delivered
+//       is where the reason for it has to be on the record.
+//
+// Only those are overridden, and only with vocabulary the Initial Chart already
+// uses. Where a diagnosis exists but no group covers it — removable pros
+// (edentulism) and frenectomy (aberrant frenum attachment) — the line is left
+// alone rather than forced into an approximate category.
 const PERIO_STAGING = "{?+perioExtent} {?+perioStage} {?+perioGrade}";
+
+// The periodontal diagnosis clause, same shape as the Initial Chart's. Extent,
+// stage and grade are optional, so they vanish on the mucogingival cases where
+// staging does not apply and the line stays short.
+const PERIO_DX = `${PERIO_STAGING} {+perioDx}`;
 
 export const VN_OVERRIDES = {
   restorative: {
     direct_resto: {
       v1: { A: "#{tooth} {+restoDx}." },
+    },
+    fixed_pros: {
+      v1: { A: "#{tooth} {+restoDx} — full coverage crown indicated." },
+    },
+    indirect_resto: {
+      v1: { A: "#{tooth} {+restoDx} — {restoType} indicated." },
+    },
+    ssc: {
+      v1: { A: "#{tooth} {+restoDx} — SSC indicated." },
     },
   },
   endo: {
@@ -43,24 +73,50 @@ export const VN_OVERRIDES = {
     pulpectomy: {
       v1: { A: "#{tooth} {+pulpalDx}; {+periapicalDx} — pulpectomy indicated." },
     },
+    vpt: {
+      v1: { A: "#{tooth} {+pulpalDx}; {+periapicalDx} — {vptType}." },
+    },
     apicoectomy: {
       v1: { A: "#{tooth} {+pulpalDx}; {+periapicalDx} — surgical endo indicated." },
     },
   },
   surgical: {
     extraction: {
-      v2: { O: "#{tooth} {+impaction}; {+surgFindings}." },
+      v1: { A: "#{tooth} {+surgDx} — simple extraction." },
+      v2: {
+        O: "#{tooth} {+impaction}; {+surgFindings}.",
+        A: "#{tooth} {+surgDx} — surgical extraction.",
+      },
+    },
+    implant_surg: {
+      v1: { A: "#{tooth} {+implantSite} — implant placement." },
+    },
+    bone_graft: {
+      v1: { A: "#{tooth} {+surgDx} — socket preservation." },
     },
   },
   perio: {
     srp: {
       v1: { A: `${PERIO_STAGING} periodontitis — active SRP.` },
+      v3: { A: "Post-SRP response: {response} — {+perioStatus}." },
     },
     perio_maint: {
       v1: { A: `${PERIO_STAGING} periodontitis — {+perioStatus}.` },
     },
+    gtr: {
+      v1: { A: `#{tooth} ${PERIO_DX} — GTR.` },
+    },
+    ctg: {
+      v1: { A: `#{tooth} ${PERIO_DX} — CTG root coverage.` },
+    },
+    fgg: {
+      v1: { A: `#{tooth} ${PERIO_DX} — FGG.` },
+    },
   },
   general: {
+    checkup: {
+      v1: { A: "{+examDx}; caries risk {+cariesRisk}." },
+    },
     tmd: {
       v1: { A: "{+tmdDx}; {?+tmdComorbid}." },
     },
