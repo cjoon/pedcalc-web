@@ -3,7 +3,7 @@
 ## Context
 
 pedcalc-med(소아 약물 용량 계산기, React 19 + Vite, GitHub Pages 배포 중)에
-`dental-charting.html` 프로토타입(`~/projects/charting-template/`, 읽기 전용 참조)의
+`dental-charting.html` 프로토타입(`reference/dental-charting.html`, 읽기 전용 참조)의
 SOAP 차팅 템플릿 기능을 합쳐 하나의 앱(ChartRx)으로 만든다.
 프로토타입은 단일 HTML에 기능이 누적되다 붕괴한 전력이 있으므로, 릴리스를 작게 나누고
 각 단계마다 진료실 실사용 검증과 Codex 리뷰를 거친다.
@@ -13,6 +13,12 @@ SOAP 차팅 템플릿 기능을 합쳐 하나의 앱(ChartRx)으로 만든다.
 - 스택: 기존 그대로 — React JS/JSX + plain CSS + React state/localStorage
   (TypeScript·Tailwind·Zustand·dnd-kit 도입 안 함, v1.1 이후 재검토)
 - 이번 라운드 범위: MVP = Initial Chart + Dosage 탭
+
+**결정 사항 (2026-09-21, CJ 확정):**
+- 프로토타입 사본은 repo 안 `reference/`로 옮긴다. 외부 폴더(`~/projects/charting-template`,
+  `~/projects/chartrx`)는 `~/projects/_archive/`로 보관하고 parity 스크립트는 repo 내부만 본다.
+- 다음 기능은 Supply Order 탭(치과 물품 주문서: 인쇄/PDF + CSV). 카탈로그는
+  `~/projects/dental-supply`(별도 Python 파서) 결과를 쓰되, 파싱 범위·정확도 결정 전까지 착수 보류.
 
 ---
 

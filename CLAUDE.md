@@ -64,6 +64,7 @@ Pages: cjoon.github.io/pedcalc-web. See PLAN.md for the integration roadmap.
 - src/chart/data/cdtCodes.js         : CDT code per procedure (UNKNOWN — empty until CJ provides)
 - src/chart/data/anesthetics.js      : anesthetic agent specs; limits come from medications.js
 - scripts/check-data-parity.mjs      : chart data vs. dental-charting.html, exit 1 on mismatch
+- reference/dental-charting.html     : read-only prototype (parity source) — never edit
 
 ## Domain Rules (NEVER violate)
 - Drug data follows AAPD Reference Manual 2025-2026. Never invent doses,

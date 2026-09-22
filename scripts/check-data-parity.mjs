@@ -7,10 +7,7 @@ import path from "node:path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
-const prototypePath = path.join(
-  process.env.HOME,
-  "projects/charting-template/dental-charting.html"
-);
+const prototypePath = path.join(repoRoot, "reference/dental-charting.html");
 
 const html = readFileSync(prototypePath, "utf8");
 

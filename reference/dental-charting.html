@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChartRx">
+<meta name="theme-color" content="#0f5c4a">
+<meta name="description" content="Dental SOAP charting templates — fast, offline-ready">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>ChartRx — Dental Charting Templates</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+:root{--bg:#f4f2ec;--panel:#fbfaf6;--ink:#1a2420;--ink-soft:#5a655e;--line:#d9d5c8;--accent:#0f5c4a;--accent-soft:#e3efe9;--accent-bright:#14745d;--amber:#c4702a;--amber-soft:#f6e9da;--field:#fffdf7;--field-active:#fff8e6;--red:#b4452f;--red-soft:#f7ebe8;--shadow:0 1px 2px rgba(26,36,32,.06),0 6px 24px rgba(26,36,32,.06);--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;background-image:radial-gradient(rgba(15,92,74,.025) 1px,transparent 1px);background-size:22px 22px;padding-top:env(safe-area-inset-top)}
+.app{display:grid;grid-template-columns:290px 1fr;height:100vh}
+/* SIDEBAR */
+.sidebar{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.brand{padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+.brand h1{font-family:'Newsreader',serif;font-size:26px;font-weight:600;letter-spacing:-.5px;display:flex;align-items:baseline;gap:7px}
+.brand h1 .rx{color:var(--accent);font-style:italic}
+.brand p{font-size:11.5px;color:var(--ink-soft);margin-top:3px;letter-spacing:.3px}
+.search-wrap{padding:14px 16px 8px}
+.search-wrap input{width:100%;padding:9px 12px;font-size:13px;font-family:inherit;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);outline:none}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search-wrap input::placeholder{color:#a8a99c}
+.proc-list{flex:1;overflow-y:auto;padding:4px 10px 20px}
+.proc-list::-webkit-scrollbar{width:8px}
+.proc-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.cat-label{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);padding:16px 12px 6px;display:flex;align-items:center;gap:7px}
+.cat-label::after{content:'';flex:1;height:1px;background:var(--line)}
+.proc-item{padding:7px 12px;font-size:13.5px;border-radius:7px;cursor:pointer;color:var(--ink);display:flex;justify-content:space-between;align-items:center;transition:background .12s,color .12s;user-select:none}
+.proc-item:hover{background:var(--accent-soft)}
+.proc-item.active{background:var(--accent);color:#fff;font-weight:500}
+.proc-item .tag{font-size:9.5px;font-family:'IBM Plex Mono';opacity:.55;letter-spacing:.5px}
+.proc-item.active .tag{opacity:.8}
+/* version pills under proc */
+.ver-list{padding:3px 12px 6px 26px;display:flex;flex-wrap:wrap;gap:5px}
+.ver-pill{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);background:var(--field);cursor:pointer;color:var(--ink-soft);transition:all .12s;font-family:'IBM Plex Mono'}
+.ver-pill:hover{border-color:var(--accent);color:var(--accent)}
+.ver-pill.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--panel)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-family:'Newsreader',serif;font-size:21px;font-weight:600}
+.topbar-title .sub{font-family:'IBM Plex Mono';font-size:11px;color:var(--ink-soft);margin-left:10px;letter-spacing:.5px}
+.topbar-actions{display:flex;gap:9px;align-items:center}
+button.btn{font-family:'IBM Plex Sans';font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--field);color:var(--ink);display:flex;align-items:center;gap:6px;transition:all .14s;white-space:nowrap}
+button.btn:hover{border-color:var(--accent);color:var(--accent)}
+button.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.btn.primary:hover{background:var(--accent-bright);color:#fff}
+button.btn.danger:hover{border-color:var(--red);color:var(--red)}
+button.btn svg{width:14px;height:14px;flex-shrink:0}
+.workspace{flex:1;overflow-y:auto;padding:28px 28px 60px}
+.workspace::-webkit-scrollbar{width:10px}
+.workspace::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink-soft);text-align:center;gap:14px}
+.empty .big{font-family:'Newsreader',serif;font-size:28px;color:var(--ink)}
+.empty svg{width:56px;height:56px;opacity:.3}
+/* CHART CARD */
+.chart-card{max-width:820px;margin:0 auto;background:var(--field);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:visible}
+.chart-head{padding:18px 26px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--field));display:flex;justify-content:space-between;align-items:center;border-radius:var(--r) var(--r) 0 0}
+.chart-head .name{font-family:'Newsreader',serif;font-size:22px;font-weight:600}
+.chart-head .cat{font-size:11px;font-family:'IBM Plex Mono';color:var(--amber);letter-spacing:.5px;text-transform:uppercase}
+.soap-block{padding:4px 26px}
+.soap-row{display:flex;gap:16px;padding:16px 0;border-bottom:1px dashed var(--line)}
+.soap-row:last-child{border-bottom:none}
+.soap-letter{flex-shrink:0;width:34px;height:34px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-family:'Newsreader',serif;font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.soap-body{flex:1;padding-top:4px}
+.soap-name{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:7px}
+.soap-text{font-size:14.5px;line-height:1.95;color:var(--ink)}
+.soap-text ul{list-style:none}
+.soap-text li{position:relative;padding-left:16px;margin:2px 0}
+.soap-text li::before{content:'–';position:absolute;left:0;color:var(--accent)}
+/* INLINE FIELD */
+.fld{display:inline-flex;align-items:center;gap:3px;min-width:38px;padding:1px 7px;margin:0 1px;background:var(--field-active);border:1px solid #e8d9b0;border-radius:5px;font-family:'IBM Plex Mono';font-size:13px;color:var(--amber);cursor:pointer;transition:all .12s;line-height:1.6;vertical-align:baseline;position:relative}
+.fld:hover{border-color:var(--amber);background:#fff}
+.fld.open{border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px var(--amber-soft)}
+.fld.filled{color:var(--ink);border-color:var(--line);background:var(--field)}
+.fld .ph{color:#c9b896;font-style:italic}
+.fld .caret{width:9px;height:9px;opacity:.5;flex-shrink:0}
+.fld.filled .caret{opacity:.35}
+/* DROPDOWN */
+.dropdown{position:fixed;z-index:200;min-width:180px;max-width:280px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 30px rgba(26,36,32,.16);overflow:hidden;font-family:'IBM Plex Sans';animation:pop .12s ease}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.dropdown .dd-head{padding:8px 12px 6px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--line)}
+.dropdown .dd-opts{max-height:240px;overflow-y:auto;padding:4px}
+.dropdown .dd-opts::-webkit-scrollbar{width:7px}
+.dropdown .dd-opts::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.dd-opt{padding:7px 11px;font-size:13px;border-radius:6px;cursor:pointer;font-family:'IBM Plex Mono';color:var(--ink)}
+.dd-opt:hover,.dd-opt.hl{background:var(--accent-soft);color:var(--accent)}
+.dd-custom{border-top:1px solid var(--line);padding:8px;display:flex;gap:6px}
+.dd-custom input{flex:1;padding:7px 10px;font-size:13px;font-family:'IBM Plex Mono';border:1px solid var(--line);border-radius:6px;outline:none;color:var(--ink)}
+.dd-custom input:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+.dd-custom button{padding:0 12px;font-size:12px;font-weight:600;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,36,32,.45);backdrop-filter:blur(3px);z-index:400;display:none;align-items:center;justify-content:center;padding:30px}
+.modal-overlay.show{display:flex;animation:fade .15s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{background:var(--panel);width:100%;max-width:960px;max-height:90vh;border-radius:14px;box-shadow:0 20px 60px rgba(26,36,32,.3);display:flex;flex-direction:column;overflow:hidden;animation:rise .2s ease}
+@keyframes rise{from{transform:translateY(14px);opacity:.6}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:var(--field);flex-shrink:0}
+.modal-title{font-family:'Newsreader',serif;font-size:21px;font-weight:600}
+.modal-close{background:none;border:none;font-size:28px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:0 4px}
+.modal-close:hover{color:var(--ink)}
+/* TABS */
+.modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);background:var(--panel);flex-shrink:0}
+.tab{padding:12px 22px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--ink-soft);transition:all .14s;user-select:none}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none;flex:1;overflow:hidden}
+.tab-content.active{display:flex;flex-direction:column}
+/* OPTIONS TAB */
+.opt-toolbar{padding:14px 24px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.opt-toolbar input{flex:1;min-width:200px;padding:9px 12px;font-size:13px;font-family:inherit;border:1px solid var(--line);border-radius:8px;background:var(--field);outline:none}
+.opt-toolbar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.opt-toolbar-btns{display:flex;gap:7px}
+.opt-body{flex:1;overflow-y:auto;padding:8px 24px 24px}
+.opt-body::-webkit-scrollbar{width:9px}
+.opt-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+.opt-group{padding:16px 0;border-bottom:1px solid var(--line)}
+.opt-group:last-child{border-bottom:none}
+.opt-group-head{display:flex;align-items:baseline;gap:9px;margin-bottom:10px}
+.opt-group-label{font-size:14px;font-weight:700;color:var(--ink)}
+.opt-group-key{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--ink-soft);background:var(--accent-soft);padding:2px 7px;border-radius:5px}
+.opt-chips{display:flex;flex-wrap:wrap;gap:7px}
+.opt-chip{display:inline-flex;align-items:center;gap:6px;background:var(--field);border:1px solid var(--line);border-radius:7px;padding:5px 6px 5px 11px;font-family:'IBM Plex Mono';font-size:12.5px;color:var(--ink)}
+.opt-chip .del{cursor:pointer;width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:15px;line-height:1}
+.opt-chip .del:hover{background:#f3ddd5;color:var(--red)}
+.opt-add{display:inline-flex;align-items:center;gap:5px}
+.opt-add input{width:130px;padding:5px 9px;font-size:12.5px;font-family:'IBM Plex Mono';border:1px dashed var(--accent);border-radius:7px;background:var(--accent-soft);outline:none;color:var(--ink)}
+.opt-add input:focus{background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
+.opt-add input::placeholder{color:var(--accent);opacity:.6}
+/* TEMPLATES TAB */
+.tpl-layout{display:grid;grid-template-columns:240px 1fr;flex:1;overflow:hidden}
+.tpl-sidebar{border-right:1px solid var(--line);overflow-y:auto;padding:12px 0 20px}
+.tpl-sidebar::-webkit-scrollbar{width:7px}
+.tpl-sidebar::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+.tpl-cat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);padding:14px 16px 5px;display:flex;align-items:center;gap:6px}
+.tpl-cat::after{content:'';flex:1;height:1px;background:var(--line)}
+.tpl-proc{padding:6px 16px;cursor:pointer;border-radius:0}
+.tpl-proc-name{font-size:13px;color:var(--ink);display:flex;justify-content:space-between;align-items:center}
+.tpl-proc-name:hover{color:var(--accent)}
+.tpl-versions{padding:4px 0 4px 12px;display:flex;flex-direction:column;gap:3px}
+.tpl-ver{font-size:12px;font-family:'IBM Plex Mono';padding:4px 10px;border-radius:6px;cursor:pointer;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;gap:6px}
+.tpl-ver:hover{background:var(--accent-soft);color:var(--accent)}
+.tpl-ver.active{background:var(--accent);color:#fff}
+.tpl-ver .ver-del{opacity:0;font-size:14px;line-height:1;flex-shrink:0}
+.tpl-ver:hover .ver-del{opacity:.6}
+.tpl-ver.active .ver-del{opacity:.7}
+.tpl-ver .ver-del:hover{opacity:1!important}
+.add-ver-btn{margin:6px 16px 0;font-size:12px;padding:5px 10px;border:1px dashed var(--accent);border-radius:6px;background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'IBM Plex Sans';font-weight:600;width:calc(100% - 32px);text-align:left}
+.add-ver-btn:hover{background:#d4e9e1}
+/* TEMPLATE EDITOR */
+.tpl-editor{flex:1;overflow-y:auto;padding:24px 28px 40px;display:flex;flex-direction:column;gap:0}
+.tpl-editor::-webkit-scrollbar{width:9px}
+.tpl-editor::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+.tpl-editor-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-style:italic;font-size:14px}
+.tpl-editor-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.tpl-ver-name-input{font-family:'Newsreader',serif;font-size:22px;font-weight:600;border:none;background:transparent;outline:none;color:var(--ink);border-bottom:2px solid var(--line);padding:2px 4px;min-width:200px}
+.tpl-ver-name-input:focus{border-bottom-color:var(--accent)}
+.tpl-editor-actions{display:flex;gap:8px}
+.soap-editor-block{margin-bottom:16px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.soap-editor-head{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.soap-editor-letter{width:28px;height:28px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-family:'Newsreader',serif;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.soap-editor-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft);flex:1}
+.soap-editor-body{padding:12px 16px}
+/* textarea row */
+.soap-textarea{width:100%;min-height:52px;padding:10px 12px;font-size:14px;font-family:'IBM Plex Sans';line-height:1.7;border:1px solid var(--line);border-radius:8px;resize:vertical;outline:none;color:var(--ink);background:var(--field)}
+.soap-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+/* P step list */
+.step-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.step-row{display:flex;align-items:flex-start;gap:8px;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:grab}
+.step-row:active{cursor:grabbing}
+.step-row.drag-over{border-color:var(--accent);background:var(--accent-soft)}
+.step-row.dragging{opacity:.4}
+.step-drag{color:var(--line);font-size:16px;cursor:grab;padding-top:1px;flex-shrink:0;user-select:none}
+.step-input{flex:1;border:none;background:transparent;font-size:13.5px;font-family:'IBM Plex Sans';color:var(--ink);outline:none;line-height:1.6;resize:none;min-height:24px}
+.step-del{color:var(--ink-soft);cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;padding-top:1px}
+.step-del:hover{color:var(--red)}
+.add-step-btn{font-size:12.5px;padding:7px 12px;border:1px dashed var(--accent);border-radius:8px;background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'IBM Plex Sans';font-weight:600;width:100%;text-align:left;margin-top:2px}
+.add-step-btn:hover{background:#d4e9e1}
+/* placeholder helper */
+.ph-helper{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.ph-chip{font-family:'IBM Plex Mono';font-size:11px;padding:3px 9px;border-radius:5px;background:var(--amber-soft);color:var(--amber);border:1px solid #e8d9b0;cursor:pointer;user-select:none}
+.ph-chip:hover{background:#f0d5bb}
+.ph-label{font-size:11px;color:var(--ink-soft);margin-right:4px;align-self:center}
+/* hints */
+.hint{max-width:820px;margin:14px auto 0;font-size:11.5px;color:var(--ink-soft);text-align:center;font-style:italic}
+.field-count{font-size:11px;color:var(--ink-soft);font-family:'IBM Plex Mono';background:var(--amber-soft);padding:3px 9px;border-radius:20px}
+/* toast */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 22px;border-radius:9px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:all .25s;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;z-index:500}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast svg{width:15px;height:15px;color:#6ee7b7}
+
+/* ===================== PREVIEW MODAL ===================== */
+.preview-overlay{position:fixed;inset:0;background:rgba(26,36,32,.5);backdrop-filter:blur(4px);z-index:600;display:none;align-items:center;justify-content:center;padding:24px}
+.preview-overlay.show{display:flex;animation:fade .15s ease}
+.preview-modal{background:var(--panel);width:100%;max-width:780px;max-height:92vh;border-radius:14px;box-shadow:0 24px 70px rgba(26,36,32,.35);display:flex;flex-direction:column;overflow:hidden;animation:rise .2s ease}
+.preview-head{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:var(--field);flex-shrink:0}
+.preview-head-left{display:flex;flex-direction:column;gap:3px}
+.preview-head-title{font-family:'Newsreader',serif;font-size:20px;font-weight:600}
+.preview-head-sub{font-size:11.5px;color:var(--ink-soft)}
+.preview-head-actions{display:flex;gap:8px;align-items:center}
+.preview-body{flex:1;overflow-y:auto;padding:24px 28px 32px}
+.preview-body::-webkit-scrollbar{width:9px}
+.preview-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+/* editable preview rows */
+.pv-row{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line)}
+.pv-row:last-child{border-bottom:none}
+.pv-letter{flex-shrink:0;width:32px;height:32px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-family:'Newsreader',serif;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.pv-body{flex:1}
+.pv-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+.pv-text{font-size:14.5px;line-height:1.85;color:var(--ink);outline:none;border-radius:6px;padding:6px 8px;min-height:32px;border:1px solid transparent;transition:border .12s,background .12s;white-space:pre-wrap;word-break:break-word}
+.pv-text:hover{border-color:var(--line);background:#fafaf5}
+.pv-text:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-soft)}
+.pv-text[data-type="list"]{padding:0}
+.pv-step{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;border-radius:6px;border:1px solid transparent;margin:2px 0}
+.pv-step:hover{border-color:var(--line);background:#fafaf5}
+.pv-step-bullet{color:var(--accent);flex-shrink:0;margin-top:2px;font-size:13px}
+.pv-step-text{flex:1;font-size:14px;line-height:1.7;outline:none;border:none;background:transparent;color:var(--ink);resize:none;min-height:22px;font-family:'IBM Plex Sans',sans-serif}
+.pv-step-del{color:var(--ink-soft);cursor:pointer;font-size:16px;opacity:0;flex-shrink:0;line-height:1.4;padding:0 2px}
+.pv-step:hover .pv-step-del{opacity:.5}
+.pv-step-del:hover{opacity:1!important;color:var(--red)}
+.pv-add-step{font-size:12px;color:var(--accent);cursor:pointer;padding:5px 8px;border-radius:6px;border:1px dashed var(--accent);background:var(--accent-soft);display:inline-block;margin-top:6px;font-weight:600}
+.pv-add-step:hover{background:#d4e9e1}
+/* unfilled badge */
+.unfilled-badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;background:var(--amber-soft);color:var(--amber);border:1px solid #e8d9b0;padding:4px 10px;border-radius:20px;font-weight:600}
+.unfilled-badge svg{width:13px;height:13px}
+/* preview button in topbar */
+.btn.preview-btn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.preview-btn:hover{background:var(--accent);color:#fff}
+.btn.preview-btn.all-filled{background:var(--accent);color:#fff;animation:pulse-green .4s ease}
+@keyframes pulse-green{0%{box-shadow:0 0 0 0 rgba(15,92,74,.5)}70%{box-shadow:0 0 0 8px rgba(15,92,74,0)}100%{box-shadow:0 0 0 0 rgba(15,92,74,0)}}
+/* mobile preview */
+@media(max-width:700px){
+  .preview-overlay{padding:0;align-items:flex-end}
+  .preview-modal{max-height:95vh;border-radius:16px 16px 0 0;max-width:100%}
+  .preview-body{padding:16px 16px 28px}
+  .pv-text{font-size:13.5px}
+  .pv-step-text{font-size:13.5px}
+}
+/* ===================== MOBILE ===================== */
+@media(max-width:700px){
+  /* hide desktop layout */
+  .app{display:block;height:100vh;overflow:hidden}
+  .sidebar{display:none}
+  .main{display:flex;flex-direction:column;height:100vh}
+  .topbar{padding:12px 16px;gap:8px}
+  .topbar-left{min-width:0;flex:1}
+  .topbar-title{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar-title .sub{display:none}
+  .topbar-actions{gap:6px;flex-shrink:0}
+  button.btn{padding:7px 11px;font-size:12px;gap:4px}
+  button.btn svg{width:13px;height:13px}
+  .field-count{font-size:10px;padding:2px 7px}
+  .workspace{padding:16px 14px 100px}
+  .soap-block{padding:4px 14px}
+  .soap-row{gap:10px;padding:13px 0}
+  .chart-head{padding:14px 18px}
+  .chart-head .name{font-size:17px}
+  .soap-text{font-size:13.5px}
+  .fld{font-size:12px;padding:1px 6px}
+  .hint{font-size:11px;padding:0 8px}
+  /* toast above bottom nav */
+  .toast{bottom:80px}
+
+  /* ---- BOTTOM NAV BAR ---- */
+  .mob-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;height:60px;
+    background:var(--panel);border-top:1px solid var(--line);
+    z-index:100;safe-area-inset-bottom:env(safe-area-inset-bottom);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .mob-nav-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;cursor:pointer;color:var(--ink-soft);transition:color .14s;
+    font-size:10px;font-weight:600;letter-spacing:.3px;border:none;background:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mob-nav-btn svg{width:22px;height:22px}
+  .mob-nav-btn.active{color:var(--accent)}
+  .mob-nav-btn.active svg{stroke:var(--accent)}
+
+  /* ---- PROCEDURE PANEL (slides up) ---- */
+  .mob-proc-panel{
+    display:flex;flex-direction:column;
+    position:fixed;inset:0;bottom:60px;
+    background:var(--panel);z-index:90;
+    transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+  }
+  .mob-proc-panel.open{transform:translateX(0)}
+  .mob-panel-head{
+    padding:16px 18px 12px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  .mob-panel-head h2{font-family:'Newsreader',serif;font-size:20px;font-weight:600}
+  .mob-panel-close{background:none;border:none;font-size:26px;color:var(--ink-soft);cursor:pointer;line-height:1;padding:0 2px}
+  .mob-search-wrap{padding:10px 14px 6px;flex-shrink:0}
+  .mob-search-wrap input{width:100%;padding:9px 12px;font-size:15px;font-family:inherit;border:1px solid var(--line);border-radius:9px;background:var(--field);color:var(--ink);outline:none;-webkit-appearance:none}
+  .mob-search-wrap input:focus{border-color:var(--accent)}
+  .mob-proc-list{flex:1;overflow-y:auto;padding:4px 10px 16px;-webkit-overflow-scrolling:touch}
+  .mob-proc-list .cat-label{font-size:10px;padding:14px 10px 5px}
+  .mob-proc-list .proc-item{padding:11px 12px;font-size:14px;border-radius:8px;min-height:44px}
+  .mob-proc-list .ver-list{padding:4px 10px 6px 22px}
+  .mob-proc-list .ver-pill{font-size:12px;padding:4px 11px;min-height:32px;display:inline-flex;align-items:center}
+
+  /* ---- CHART VIEW - full screen ---- */
+  .mob-chart-view{
+    display:none;flex-direction:column;
+    position:fixed;inset:0;bottom:60px;
+    background:var(--bg);z-index:80;overflow:hidden;
+  }
+  .mob-chart-view.open{display:flex}
+  .mob-chart-topbar{
+    padding:12px 16px;border-bottom:1px solid var(--line);
+    background:var(--panel);display:flex;align-items:center;gap:10px;flex-shrink:0;
+  }
+  .mob-back-btn{background:none;border:none;color:var(--accent);font-size:14px;font-weight:600;
+    display:flex;align-items:center;gap:4px;cursor:pointer;padding:4px 0;white-space:nowrap;flex-shrink:0}
+  .mob-back-btn svg{width:16px;height:16px}
+  .mob-chart-title{font-size:14px;font-weight:600;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mob-chart-actions{display:flex;gap:6px;flex-shrink:0}
+  .mob-chart-scroll{flex:1;overflow-y:auto;padding:14px 14px 24px;-webkit-overflow-scrolling:touch}
+
+  /* ---- VERSION SHEET (slides up from bottom) ---- */
+  .mob-ver-sheet{
+    position:fixed;bottom:60px;left:0;right:0;
+    background:var(--panel);border-top:2px solid var(--line);border-radius:14px 14px 0 0;
+    z-index:110;transform:translateY(100%);transition:transform .2s ease;
+    padding:16px 18px 20px;max-height:55vh;overflow-y:auto;
+  }
+  .mob-ver-sheet.open{transform:translateY(0)}
+  .mob-ver-sheet h3{font-family:'Newsreader',serif;font-size:17px;font-weight:600;margin-bottom:12px;color:var(--ink)}
+  .mob-ver-list{display:flex;flex-direction:column;gap:8px}
+  .mob-ver-item{
+    padding:13px 16px;border:1px solid var(--line);border-radius:9px;
+    cursor:pointer;font-size:14px;color:var(--ink);background:var(--field);
+    display:flex;align-items:center;justify-content:space-between;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mob-ver-item.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .mob-ver-item .check{color:var(--accent);font-size:16px}
+  .mob-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:105;display:none}
+  .mob-sheet-overlay.open{display:block}
+
+  /* mobile dropdown - bottom sheet style */
+  .dropdown{
+    position:fixed!important;bottom:60px!important;left:8px!important;right:8px!important;
+    top:auto!important;width:auto!important;max-width:none!important;
+    border-radius:14px 14px 0 0;max-height:55vh;
+    animation:slideUp .2s ease;
+  }
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .dropdown .dd-opts{max-height:calc(55vh - 100px)}
+  .dd-opt{padding:13px 14px;font-size:14px;min-height:44px;display:flex;align-items:center}
+
+  /* mobile settings modal */
+  .modal-overlay{padding:0;align-items:flex-end}
+  .modal{max-width:100%;max-height:92vh;border-radius:16px 16px 0 0}
+  .modal-head{padding:16px 20px}
+  .modal-title{font-size:18px}
+  .tpl-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .tpl-sidebar{border-right:none;border-bottom:1px solid var(--line);max-height:35vh}
+  .tab{padding:10px 16px;font-size:12.5px}
+  .opt-toolbar{padding:10px 16px;flex-direction:column;align-items:stretch}
+  .opt-toolbar-btns{flex-wrap:wrap}
+  .opt-body{padding:8px 16px 24px}
+  .tpl-editor{padding:16px 16px 32px}
+}
+/* hide mobile elements on desktop */
+@media(min-width:701px){
+  .mob-nav,.mob-proc-panel,.mob-chart-view,.mob-ver-sheet,.mob-sheet-overlay{display:none!important}
+}
+/* SIDEBAR MODE TOGGLE */
+.mode-toggle{display:flex;margin:10px 14px 4px;background:var(--line);border-radius:8px;padding:3px;gap:2px}
+.mode-btn{flex:1;padding:6px 4px;font-size:11.5px;font-weight:600;border:none;border-radius:6px;cursor:pointer;background:transparent;color:var(--ink-soft);transition:all .15s;font-family:'IBM Plex Sans',sans-serif;white-space:nowrap}
+.mode-btn.active{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(26,36,32,.12)}
+/* VISIT NOTES sidebar */
+.vn-proc-name{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);padding:14px 12px 5px;display:flex;align-items:center;gap:7px}
+.vn-proc-name::after{content:'';flex:1;height:1px;background:var(--line)}
+.vn-visit-item{padding:9px 12px;font-size:13px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:9px;color:var(--ink);transition:background .12s}
+.vn-visit-item:hover{background:var(--accent-soft)}
+.vn-visit-item.active{background:var(--accent);color:#fff}
+.vn-visit-num{flex-shrink:0;width:22px;height:22px;border-radius:5px;background:rgba(15,92,74,.1);color:var(--accent);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono'}
+.vn-visit-item.active .vn-visit-num{background:rgba(255,255,255,.25);color:#fff}
+/* VISIT NOTE CARD */
+.vn-card{max-width:820px;margin:0 auto;background:var(--field);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:visible}
+.vn-card-head{padding:16px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--field));border-radius:var(--r) var(--r) 0 0;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px}
+.vn-card-head-left{display:flex;flex-direction:column;gap:3px}
+.vn-proc-label{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft)}
+.vn-visit-title{font-family:'Newsreader',serif;font-size:21px;font-weight:600;color:var(--ink)}
+.vn-date-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.vn-date-label{font-size:11.5px;color:var(--ink-soft)}
+.vn-date-input{font-family:'IBM Plex Mono';font-size:13px;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:3px 9px;background:var(--field-active);outline:none}
+.vn-date-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.vn-tag{font-size:10px;font-family:'IBM Plex Mono';color:var(--amber);letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;background:var(--amber-soft);border-radius:5px;border:1px solid #e8d9b0}
+.vn-section{padding:14px 24px;border-bottom:1px dashed var(--line)}
+.vn-section:last-child{border-bottom:none;padding-bottom:22px}
+.vn-section-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.vn-section-letter{flex-shrink:0;width:30px;height:30px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-family:'Newsreader',serif;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.vn-section-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft)}
+.vn-textarea{width:100%;padding:10px 12px;font-size:14px;font-family:'IBM Plex Sans';line-height:1.75;border:1px solid var(--line);border-radius:8px;resize:none;outline:none;color:var(--ink);background:var(--field);min-height:44px}
+.vn-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.vn-step-list{display:flex;flex-direction:column;gap:5px}
+.vn-step-row{display:flex;align-items:flex-start;gap:7px;padding:7px 10px;background:var(--field);border:1px solid var(--line);border-radius:7px;cursor:grab}
+.vn-step-row:active{cursor:grabbing}
+.vn-step-row.drag-over{border-color:var(--accent);background:var(--accent-soft)}
+.vn-step-row.dragging{opacity:.4}
+.vn-step-drag{color:var(--line);font-size:14px;cursor:grab;flex-shrink:0;user-select:none;padding-top:2px}
+.vn-step-bullet{color:var(--accent);flex-shrink:0;margin-top:3px;font-size:12px}
+.vn-step-ta{flex:1;border:none;background:transparent;font-size:13.5px;font-family:'IBM Plex Sans';color:var(--ink);outline:none;resize:none;min-height:20px;line-height:1.6}
+.vn-step-del{color:var(--ink-soft);cursor:pointer;font-size:16px;opacity:0;flex-shrink:0;line-height:1.4;padding-top:1px}
+.vn-step-row:hover .vn-step-del{opacity:.5}
+.vn-step-del:hover{opacity:1!important;color:var(--red)}
+.vn-add-step{font-size:12px;padding:6px 11px;border:1px dashed var(--accent);border-radius:7px;background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'IBM Plex Sans';font-weight:600;margin-top:5px;display:inline-block}
+.vn-add-step:hover{background:#d4e9e1}
+.vn-outcome-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vn-outcome-label{font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px}
+.vn-fld{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;margin:0 1px;background:var(--field-active);border:1px solid #e8d9b0;border-radius:5px;font-family:'IBM Plex Mono';font-size:12.5px;color:var(--amber);cursor:pointer;transition:all .12s;vertical-align:baseline}
+.vn-fld:hover,.vn-fld.open{border-color:var(--amber);background:#fff}
+.vn-fld.filled{color:var(--ink);border-color:var(--line);background:var(--field)}
+.vn-fld .ph{color:#c9b896;font-style:italic}
+.vn-fld .caret{width:8px;height:8px;opacity:.5;flex-shrink:0}
+@media(max-width:700px){
+  .mode-toggle{margin:8px 10px 4px}
+  .mode-btn{font-size:11px;padding:5px 3px}
+  .vn-card-head{padding:12px 16px}
+  .vn-section{padding:12px 16px}
+  .vn-outcome-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><h1>Chart<span class="rx">Rx</span></h1><p>Dental charting templates · SOAP</p></div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeInitial" onclick="switchMode('initial')">Initial Chart</button>
+      <button class="mode-btn" id="modeVisit" onclick="switchMode('visit')">Visit Notes</button>
+    </div>
+    <!-- Initial mode -->
+    <div id="initialSidebarPanel">
+      <div class="search-wrap"><input id="search" type="text" placeholder="Search procedures…"></div>
+      <nav class="proc-list" id="procList"></nav>
+    </div>
+    <!-- Visit Notes mode -->
+    <div id="visitSidebarPanel" style="display:none;flex:1;overflow-y:auto;padding:4px 10px 20px">
+      <div class="search-wrap" style="padding:10px 2px 6px"><input id="vnSearch" type="text" placeholder="Search procedures…"></div>
+      <nav id="vnProcList"></nav>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topTitle">Select a procedure<span class="sub" id="topSub"></span></div>
+      </div>
+      <div class="topbar-actions">
+        <span class="field-count" id="fieldCount" style="display:none"></span>
+        <button class="btn" id="settingsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9"/></svg>Settings</button>
+        <button class="btn" id="resetBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Clear</button>
+        <button class="btn preview-btn" id="previewBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>
+        <button class="btn primary" id="copyBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy chart</button>
+      </div>
+    </div>
+    <div class="workspace" id="workspace">
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+        <div class="big">Pick a procedure to begin</div>
+        <div>Choose from the list on the left.<br>Tap highlighted blanks to select from a dropdown or type your own.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-modal">
+    <div class="preview-head">
+      <div class="preview-head-left">
+        <div class="preview-head-title" id="pvTitle">Chart Preview</div>
+        <div class="preview-head-sub" id="pvSub">Click any line to edit directly</div>
+      </div>
+      <div class="preview-head-actions">
+        <span class="unfilled-badge" id="pvUnfilled" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span id="pvUnfilledCount"></span> unfilled</span>
+        <button class="btn" id="pvCopyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+        <button class="btn primary" id="pvDoneBtn">Done</button>
+        <button class="modal-close" id="pvClose">&times;</button>
+      </div>
+    </div>
+    <div class="preview-body" id="pvBody"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Settings</div>
+      <button class="modal-close" id="closeSettings">&times;</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="tab active" data-tab="templates">Templates</div>
+      <div class="tab" data-tab="options">Dropdown Options</div>
+    </div>
+    <!-- TEMPLATES TAB -->
+    <div class="tab-content active" id="tab-templates">
+      <div class="tpl-layout">
+        <div class="tpl-sidebar" id="tplSidebar"></div>
+        <div class="tpl-editor" id="tplEditor"><div class="tpl-editor-empty">Select a version to edit</div></div>
+      </div>
+    </div>
+    <!-- OPTIONS TAB -->
+    <div class="tab-content" id="tab-options">
+      <div class="opt-toolbar">
+        <input id="optSearch" type="text" placeholder="Search a field (e.g. anesthetic, suture, graft)…">
+        <div class="opt-toolbar-btns">
+          <button class="btn" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Export</button>
+          <button class="btn" id="importBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 8l5-5 5 5M12 3v12"/></svg>Import</button>
+          <button class="btn danger" id="resetDefaultsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Reset defaults</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+        </div>
+      </div>
+      <div class="opt-body" id="optBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span id="toastMsg"></span></div>
+
+<!-- ===== MOBILE UI ===== -->
+<!-- Bottom nav -->
+<nav class="mob-nav">
+  <button class="mob-nav-btn active" id="mobNavProc" onclick="mobShowPanel('proc')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+    Initial
+  </button>
+  <button class="mob-nav-btn" id="mobNavVisit" onclick="mobShowPanel('visit')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+    Visit
+  </button>
+  <button class="mob-nav-btn" id="mobNavChart" onclick="mobShowPanel('chart')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+    Chart
+  </button>
+  <button class="mob-nav-btn" id="mobNavSettings" onclick="openSettings('templates')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9"/></svg>
+    Settings
+  </button>
+</nav>
+
+<!-- Mobile Visit Notes panel -->
+<div class="mob-proc-panel" id="mobVisitPanel" style="transform:translateX(-100%)">
+  <div class="mob-panel-head">
+    <h2>Visit <span style="color:var(--accent);font-style:italic">Notes</span></h2>
+    <button class="mob-panel-close" onclick="mobShowPanel('chart')">&times;</button>
+  </div>
+  <div class="mob-search-wrap"><input id="mobVnSearch" type="search" placeholder="Search procedures…" autocomplete="off"></div>
+  <nav class="mob-proc-list proc-list" id="mobVnProcList"></nav>
+</div>
+
+<!-- Procedure picker panel -->
+<div class="mob-proc-panel open" id="mobProcPanel">
+  <div class="mob-panel-head">
+    <h2>Chart<span style="color:var(--accent);font-style:italic">Rx</span></h2>
+    <button class="mob-panel-close" onclick="mobShowPanel('chart')">&times;</button>
+  </div>
+  <div class="mob-search-wrap"><input id="mobSearch" type="search" placeholder="Search procedures…" autocomplete="off"></div>
+  <nav class="mob-proc-list proc-list" id="mobProcList"></nav>
+</div>
+
+<!-- Chart view panel -->
+<div class="mob-chart-view" id="mobChartView">
+  <div class="mob-chart-topbar">
+    <button class="mob-back-btn" onclick="mobShowPanel('proc')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+    <div class="mob-chart-title" id="mobChartTitle">—</div>
+    <div class="mob-chart-actions">
+      <button class="btn" id="mobResetBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+      <button class="btn preview-btn" id="mobPreviewBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      <button class="btn primary" id="mobCopyBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+    </div>
+  </div>
+  <div class="mob-chart-scroll" id="mobChartScroll"></div>
+</div>
+
+<!-- Version bottom sheet -->
+<div class="mob-sheet-overlay" id="mobSheetOverlay" onclick="closeMobVerSheet()"></div>
+<div class="mob-ver-sheet" id="mobVerSheet">
+  <h3 id="mobVerSheetTitle">Choose version</h3>
+  <div class="mob-ver-list" id="mobVerList"></div>
+</div>
+
+<script>
+try {
+/* ===== DROPDOWN OPTIONS DATA ===== */
+const OPTIONS={anesthetic:["2% Lidocaine 1:100,000 epi","2% Lidocaine 1:50,000 epi","4% Articaine 1:100,000 epi","4% Articaine 1:200,000 epi","3% Mepivacaine plain","0.5% Bupivacaine 1:200,000 epi"],dose:["1.8ml","3.6ml","1 carpule","2 carpules","0.9ml"],technique:["infiltration","IAN block","IAN block + buccal infiltration","buccal + palatal infiltration","PSA block","mental block"],tooth:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"],surface:["occlusal","mesial-occlusal (MO)","disto-occlusal (DO)","MOD","buccal","lingual","incisal"],prep:["O","MO","DO","MOD","Class III","Class IV","Class V"],grade:["2","3","4","5","6"],shade:["A1","A2","A3","A3.5","B1","B2","C1"],material:["ceramic (e.max)","zirconia","gold","composite","PFM"],cement:["RMGI (RelyX)","resin cement","GI cement","zinc phosphate","Temp-Bond"],existing:["MOD amalgam","large composite","fractured cusp","previous crown"],restoType:["inlay","onlay","crown"],margin:["chamfer","shoulder","feather-edge","deep chamfer"],reduction:["1.5","2","2.5"],size:["#3","#4","2nd primary molar","1st primary molar"],prosType:["complete denture (CD)","RPD","immediate denture","overdenture"],archDesc:["Edentulous maxilla","Edentulous mandible","Partially edentulous arch"],kennedy:["Kennedy Class I","Kennedy Class II","Kennedy Class III","Kennedy Class IV"],medicament:["MTA","Formocresol","Ferric sulfate","Ca(OH)₂"],fillMaterial:["Vitapex","ZOE","Ca(OH)₂ paste"],symptom:["cold sensitivity","mild discomfort","sensitivity to sweets","asymptomatic"],exposure:["no pulp exposure","pinpoint exposure (<1mm)","mechanical exposure","carious exposure"],vptType:["indirect pulp cap (IPC)","direct pulp cap (DPC)","partial pulpotomy (Cvek)"],capMaterial:["MTA","Biodentine","Ca(OH)₂"],site:["pulpal floor","exposure site","remaining vital pulp"],recall:["3 mo","6 mo","3, 6, 12 mo","6 & 12 mo"],canals:["1","2","3","4"],wl:["MB 20mm, ML 20.5mm, DB 21mm, DL 21mm","21mm","19mm","mesial 20mm, distal 21mm"],technique_obt:["lateral condensation","warm vertical condensation","single cone"],resection:["3","2"],retrofill:["MTA","Biodentine","Super-EBA"],suture:["4-0","5-0","6-0","3-0","4-0 PTFE","chromic gut"],width:["6","7","8","5"],height:["10","12","13","4","6"],brand:["Straumann BLT","Nobel Active","Astra EV","Osstem TS","Dentium"],fixSize:["3.5×10mm","4.0×10mm","4.3×11.5mm","4.8×8mm","5.0×10mm"],torque:["35","30","45","25"],coverType:["Cover screw","Healing abutment"],rx:["Amoxicillin 500mg + Ibuprofen","Augmentin 625mg","Clindamycin (PCN allergy)","Ibuprofen 600mg"],stage:["3 mo","4 mo","6 mo","Stage I Grade A","Stage II Grade B","Stage III Grade B","Stage III Grade C","Stage IV Grade C"],months:["3","4","6"],retention:["screw-retained, torqued, Teflon + composite seal","cement-retained, all excess cement removed"],approach:["Lateral window","Crestal (osteotome/Summers)"],graft:["FDBA (allograft)","xenograft (Bio-Oss)","autograft","allograft + xenograft mix"],amount:["0.5","1.0","1.5","2.0"],simultaneous:["Simultaneous fixture placed","Staged — implant at 2nd visit"],wallDesc:["4-wall","3-wall","intact"],defect:["buccal dehiscence","fenestration","horizontal deficiency"],boneDesc:["adequate height, thin buccal wall","reduced width <4mm","vertical defect"],timing:["simultaneous","staged"],implantStep:["Fixture placed: 4.0×10mm, 35Ncm","Implant deferred — graft only (staged)"],defectSize:["3","4","5","6"],membrane:["resorbable collagen membrane","non-resorbable d-PTFE","titanium-reinforced membrane"],reeval:["4–6 mo","6–9 mo"],pd:["4–5","4–6","5–7","6–8"],boneloss:["15–20","20–30","30–50"],quadrant:["UR","UL","LR","LL","UR & UL","LR & LL","all 4 quadrants"],sites:["#2, #15","#18, #31","#2, #15, #18, #31","generalized"],bop:["<10","10–20","20–30"],interval:["3 months","4 months","6 months"],wall:["3-wall","2-wall","1-wall","combined"],biologic:["EMD (Emdogain)","PDGF","none"],indication:["Px c/o gummy smile / short teeth","Subgingival caries/fracture, insufficient ferrule","Midline diastema / high frenum attachment"],finding:["Excessive gingival display, altered passive eruption","Fracture extends subgingival, <2mm sound tooth above crest"],clType:["esthetic","functional/restorative"],bw:["3","4"],flapPos:["apically","coronally"],heal:["6–8 wks","8–12 wks"],frenum:["maxillary labial","mandibular labial","lingual"],method:["scalpel","diode laser","electrosurgery"],closure:["Suture (4-0)","No suture (laser)"],recClass:["Miller Class I (Cairo RT1)","Miller Class II (RT1)","Miller Class III (RT2)"],recAmount:["2","3","4","5"],recipientDesign:["envelope/tunnel","coronally advanced flap"],kt:["1","2"],xray:["BWX taken","PA taken","pano taken","FMX taken"],complaint:["crowding","malocclusion","spacing","protrusion"],classification:["Class I","Class II div 1","Class II div 2","Class III"],crowding:["2","4","6","8"],oj:["2","4","6","8"],ob:["20","30","50","70"],teeth:["#5–12","#21–28","full arch (upper & lower)"],archwire:[".014 NiTi",".016 NiTi",".018 NiTi",".019×.025 SS"],retainer:["Hawley","clear (Essix)","fixed lingual bonded #6–11","upper Hawley + lower fixed"],mio:["38","40","42","32 (limited)"],deviation:["deviation on opening","no deviation","deflection to R","deflection to L"],tmjFinding:["R TMJ click","L TMJ click","bilateral clicking","crepitus","no joint sounds"],splintType:["maxillary stabilization (Michigan)","mandibular stabilization","NTI"]};
+const DEFAULT_OPTIONS=JSON.parse(JSON.stringify(OPTIONS));
+const PH_LABELS={anesthetic:"Anesthetic agent",dose:"Anesthetic dose",technique:"Injection technique",tooth:"Tooth number",surface:"Caries surface",prep:"Cavity prep class",grade:"ICDAS grade",shade:"Shade",material:"Indirect material",cement:"Cement",existing:"Existing restoration",restoType:"Restoration type",margin:"Crown margin",reduction:"Occlusal reduction (mm)",size:"SSC size",prosType:"Prosthesis type",archDesc:"Arch description",kennedy:"Kennedy classification",medicament:"Pulpotomy medicament",fillMaterial:"Canal filling material",symptom:"Symptom",exposure:"Pulp exposure",vptType:"VPT type",capMaterial:"Capping material",site:"Application site",recall:"Recall interval",canals:"Canals located",wl:"Working length",technique_obt:"Obturation technique",resection:"Root-end resection (mm)",retrofill:"Retrofill material",suture:"Suture",width:"Ridge width (mm)",height:"Bone height (mm)",brand:"Implant brand",fixSize:"Fixture size",torque:"Insertion torque (Ncm)",coverType:"Cover type",rx:"Prescription",stage:"Stage / 2nd stage timing",months:"Months post-placement",retention:"Crown retention",approach:"Sinus approach",graft:"Graft material",amount:"Graft amount (cc)",simultaneous:"Simultaneous/staged",wallDesc:"Socket walls",defect:"Defect type",boneDesc:"Bone description",timing:"GBR timing",implantStep:"Implant step",defectSize:"Defect size (mm)",membrane:"Membrane type",reeval:"Re-eval interval",pd:"Probing depth (mm)",boneloss:"Bone loss (%)",quadrant:"Quadrant",sites:"Sites",bop:"BOP (%)",interval:"Maintenance interval",wall:"Intrabony defect walls",biologic:"Biologic agent",indication:"Indication",finding:"Clinical finding",clType:"Crown lengthening type",bw:"Biologic width (mm)",flapPos:"Flap position",heal:"Healing time",frenum:"Frenum location",method:"Excision method",closure:"Closure",recClass:"Recession class",recAmount:"Recession amount (mm)",recipientDesign:"Recipient design",kt:"Keratinized tissue (mm)",xray:"Radiograph",complaint:"Ortho complaint",classification:"Malocclusion class",crowding:"Crowding (mm)",oj:"Overjet (mm)",ob:"Overbite (%)",teeth:"Teeth bonded",archwire:"Archwire",retainer:"Retainer",mio:"Max opening (mm)",deviation:"Opening deviation",tmjFinding:"TMJ finding",splintType:"Splint type"};
+
+/* ===== FACTORY TEMPLATES ===== */
+const FACTORY_TEMPLATES={restorative:{label:"Restorative & Pros",items:{direct_resto:{name:"Direct Restoration",tag:"FILL",versions:[{id:"v1",label:"Standard",S:"Px c/o sensitivity #{tooth} to cold.",O:"#{tooth} {surface} caries, ICDAS {grade}. Vital, no spontaneous pain.",A:"#{tooth} reversible pulpitis 2° caries.",P:["LA: {anesthetic} {dose}","Rubber dam isolation","Caries excavation, #{tooth} {prep} prep","Etch/bond, composite restoration (shade {shade}), incremental cure","Occlusion adjusted, polished"]}]},indirect_resto:{name:"Indirect Restoration",tag:"INLAY",versions:[{id:"v1",label:"Standard",S:"Px for #{tooth} {restoType} (large existing restoration).",O:"#{tooth} caries removal, divergent walls. Vital, no PARL.",A:"#{tooth} indicated for {material} indirect restoration.",P:["V1: LA, caries removal, {prep} prep, retraction cord, impression/scan, shade {shade}, temp placed","V2: temp removed, try-in (margin/contact/occlusion), cemented ({cement}), polished"]}]},fixed_pros:{name:"Fixed Pros (Crown/Bridge)",tag:"CROWN",versions:[{id:"v1",label:"Standard",S:"Px for #{tooth} crown prep.",O:"#{tooth} {existing} restoration, recurrent caries. Vital, no PARL.",A:"#{tooth} indicated for full coverage crown.",P:["V1 — LA: {anesthetic} {dose}; core build-up; full crown prep ({margin} margin, occlusal reduction {reduction}mm); retraction cord; final impression/scan; shade {shade}; temp cemented","V2 — temp removed; try-in verified; crown cemented ({cement}); occlusion adjusted, polished"]}]},removable_pros:{name:"Removable Pros (CD/RPD)",tag:"DENTURE",versions:[{id:"v1",label:"Standard",S:"Px for {prosType} fabrication.",O:"{archDesc}. {kennedy}",A:"Partial/complete edentulism — {prosType} indicated.",P:["V1: preliminary impression (alginate), custom tray","V2: final impression (border molding + PVS)","V3: jaw relation (VD/CR, midline)","V4: wax try-in (esthetics, phonetics, occlusion)","V5: delivery — fit checked, PIP relief, occlusion balanced","Recall 24–48h for adjustment"]}]},ssc:{name:"SSC (Stainless Steel Crown)",tag:"PEDO",versions:[{id:"v1",label:"Standard",S:"Pediatric Px, #{tooth} (primary) large caries.",O:"#{tooth} deep caries, vital, no abscess/fistula.",A:"#{tooth} extensive caries, indicated for SSC.",P:["LA, rubber dam","Caries removal ± pulpotomy","Occlusal/proximal reduction, SSC ({size}) contoured","Cemented (GI cement), occlusion/floss checked"]}]}}},endo:{label:"Endodontics",items:{pulpotomy:{name:"Pulpotomy (primary)",tag:"PEDO",versions:[{id:"v1",label:"Standard",S:"#{tooth} spontaneous pain, caries.",O:"#{tooth} deep caries to pulp, vital coronal pulp, no PARL.",A:"#{tooth} reversible pulpitis, pulpotomy indicated.",P:["LA, rubber dam","Caries removal, coronal pulp amputation","Hemostasis achieved, {medicament} applied","GI base, SSC restoration"]}]},pulpectomy:{name:"Pulpectomy (primary RCT)",tag:"PEDO",versions:[{id:"v1",label:"Standard",S:"#{tooth} pain, swelling.",O:"#{tooth} necrotic pulp, fistula present, PARL.",A:"#{tooth} irreversible pulpitis/necrosis, pulpectomy indicated.",P:["LA, rubber dam, access opening","Canal cleaning/shaping, irrigation (NaOCl)","Resorbable filling ({fillMaterial})","SSC restoration"]}]},vpt:{name:"Vital Pulp Therapy",tag:"VPT",versions:[{id:"v1",label:"IPC / DPC",S:"#{tooth} deep caries, {symptom}, no lingering/spontaneous pain.",O:"#{tooth} deep caries; {exposure}; hemostasis achieved <5min; vital.",A:"#{tooth} vital pulp — {vptType} indicated.",P:["LA, rubber dam isolation","Caries excavation; {capMaterial} placed over {site}","GI/RMGI base, final restoration","Recall: vitality test {recall}"]},{id:"v2",label:"Partial pulpotomy",S:"#{tooth} trauma/caries exposure, immature apex.",O:"#{tooth} immature apex, exposure with hemorrhage. Vital.",A:"#{tooth} vital pulp, immature root — partial pulpotomy for apexogenesis.",P:["LA, rubber dam","Remove 1–3mm inflamed coronal pulp with high-speed bur","Hemostasis (NaOCl/saline), {capMaterial} over remaining vital pulp","Final restoration","Recall to monitor continued root development"]}]},rct:{name:"Conventional RCT",tag:"ENDO",versions:[{id:"v1",label:"Standard",S:"#{tooth} c/o spontaneous, lingering pain to hot; keeps Px awake.",O:"#{tooth} deep caries; (+) lingering cold/heat; TTP; PA: PARL.",A:"#{tooth} symptomatic irreversible pulpitis with apical periodontitis.",P:["V1 — LA: {anesthetic} {dose}; rubber dam; access; {canals} canals located","Working length: apex locator + radiograph ({wl})","Cleaning & shaping (rotary NiTi), irrigation NaOCl + EDTA","CaOH₂ medicament, Cavit temp","V2 — obturation: GP + sealer ({technique_obt}); confirmatory PA; access sealed","Definitive crown advised"]}]},apicoectomy:{name:"Apicoectomy",tag:"SURG-ENDO",versions:[{id:"v1",label:"Standard",S:"#{tooth} persistent symptoms after RCT; tender; fistula present.",O:"#{tooth} prior RCT; PARL persists; fistula on buccal mucosa.",A:"#{tooth} persistent periapical pathosis; surgical endo indicated.",P:["IC signed; LA: {anesthetic} (hemostasis)","Full-thickness flap; osteotomy","Root-end resection ~{resection}mm, 0° bevel; lesion curettage (± biopsy)","Root-end prep (ultrasonic), retrofill {retrofill}","Flap repositioned, {suture} suture","Recall: suture removal 5–7d, healing eval 6/12 mo"]}]}}},surgical:{label:"Oral Surgery & Implant",items:{extraction:{name:"Extraction",tag:"SURG",versions:[{id:"v1",label:"Simple",S:"Px c/o pain #{tooth}, non-restorable.",O:"#{tooth} grossly decayed, non-restorable. PA: caries to bone level.",A:"#{tooth} non-restorable, extraction indicated.",P:["IC signed, medical Hx reviewed","LA: {anesthetic} {dose} ({technique})","Forceps/elevator extraction, #{tooth} removed intact","Socket curetted, irrigated, hemostasis with gauze","Post-op instructions given (no smoking/spitting, soft diet)","Rx prn"]},{id:"v2",label:"Surgical",S:"Px c/o pain #{tooth}, non-restorable. Surgical extraction planned.",O:"#{tooth} impacted/anklyosed/fractured root. PA reviewed.",A:"#{tooth} non-restorable, surgical extraction indicated.",P:["IC signed, risks explained (nerve, sinus, fracture)","LA: {anesthetic} {dose}","Full-thickness mucoperiosteal flap","Ostectomy / sectioning as needed","Tooth/roots removed, socket degranulated","Primary closure, {suture} suture","Post-op instructions; Rx {rx}","Recall: suture removal 7–14d"]}]},implant_surg:{name:"Implant Surgery",tag:"IMPLANT",versions:[{id:"v1",label:"Standard",S:"Px c/o missing #{tooth}, wants implant. Medical Hx reviewed.",O:"#{tooth} edentulous. CBCT: ridge width {width}mm, height {height}mm. No IAN proximity.",A:"#{tooth} partial edentulism. Adequate bone for placement.",P:["IC signed, risks/benefits explained","LA: {anesthetic} {dose}","Crestal incision, full-thickness flap","Sequential drilling, copious irrigation","Fixture: {brand} {fixSize}, torque {torque}Ncm","{coverType} placed; primary closure, {suture} suture","Post-op instruction; Rx {rx}","Recall: suture removal 10–14d, 2nd stage {stage}"]}]},implant_resto:{name:"Implant 2nd Stage / Impression / Delivery",tag:"IMPLANT",versions:[{id:"v1",label:"Standard",S:"#{tooth} implant, {months} mo post-placement, for restoration.",O:"#{tooth} osseointegration confirmed, healthy mucosa.",A:"#{tooth} ready for prosthetic phase.",P:["2nd stage: cover screw removed → healing abutment placed; heal 2–4 wks","Impression: coping connected (verified radiographically); PVS/scan; shade {shade}","Delivery: abutment torqued {torque}Ncm; crown ({retention}); occlusion adjusted","Maintenance instruction"]}]},sinus:{name:"Sinus Surgery (Sinus Lift)",tag:"IMPLANT",versions:[{id:"v1",label:"Lateral window",S:"Px for #{tooth} implant. Insufficient bone height.",O:"CBCT: #{tooth} residual height {height}mm. Membrane intact, no pathology.",A:"Posterior maxillary atrophy. Lateral window sinus augmentation indicated.",P:["IC signed (risk: perforation, sinusitis)","LA + pre-op antibiotic","Crestal incision, full-thickness flap; lateral window osteotomy (piezo/bur)","Schneiderian membrane elevated, integrity confirmed (bellows test +)","Sinus floor grafted: {graft} {amount}cc ± membrane","Simultaneous fixture / staged decision","Primary closure, {suture} suture","Post-op: no nose blowing, decongestant; recall 6–9 mo"]},{id:"v2",label:"Crestal (osteotome)",S:"Px for #{tooth} implant. Moderate bone height.",O:"CBCT: #{tooth} residual height {height}mm (6–7mm range).",A:"Crestal sinus lift with osteotome technique.",P:["LA","Osteotomy to ~1mm below sinus floor","Osteotome with mallet, greenstick fracture of sinus floor","Graft pushed apically, membrane tented","Implant placed simultaneously: {fixSize}, {torque}Ncm","Valsalva test — membrane intact confirmed","Post-op instruction; recall 4–6 mo"]}]},bone_graft:{name:"Bone Graft / Socket Preservation",tag:"GRAFT",versions:[{id:"v1",label:"Socket preservation",S:"#{tooth} non-restorable; plans future implant.",O:"#{tooth} non-restorable; {wallDesc} socket; buccal plate intact.",A:"#{tooth} extraction with socket preservation.",P:["LA, atraumatic extraction (preserve buccal plate)","Socket degranulated, irrigated","Graft: {graft} packed to bone level","Collagen plug/membrane placed","Suture ({suture}); recall 4–6 mo for re-eval"]},{id:"v2",label:"Ridge augmentation",S:"#{tooth} area, severe ridge deficiency, implant planned.",O:"Knife-edge ridge, inadequate horizontal width.",A:"Ridge augmentation prior to implant.",P:["IC signed","LA, full-thickness flap, recipient site decortication","Block graft / particulate {graft} placed and fixated","Membrane over graft","Tension-free primary closure, {suture} suture","Recall 4–6 mo; screw removal + implant staging"]}]},gbr:{name:"GBR (Guided Bone Regeneration)",tag:"GRAFT",versions:[{id:"v1",label:"Simultaneous",S:"Px for #{tooth} implant placement.",O:"#{tooth} site, {defect} expected. CBCT: {boneDesc}.",A:"#{tooth} simultaneous GBR for buccal defect.",P:["IC signed; LA, flap, vertical releasing incisions","Fixture placed: {fixSize}, {torque}Ncm","Defect exposed ({defectSize}mm), decortication","Graft: {graft}; {membrane} placed ± tacks/pins","Tension-free primary closure (periosteal release), {suture} suture","Post-op: antibiotic, CHX; recall 10–14d suture removal, re-eval {reeval}"]},{id:"v2",label:"Staged",S:"#{tooth} inadequate ridge width (<4mm) — implant not feasible now.",O:"#{tooth} site, {defect}. CBCT: {boneDesc}.",A:"#{tooth} staged GBR prior to implant.",P:["IC signed; LA, flap, decortication","Graft: {graft}; {membrane} ± titanium mesh / tenting screws","Primary closure, {suture} suture","Heal 6–9 mo, then implant placement","Monitor for membrane exposure at recall"]}]}}},perio:{label:"Periodontics",items:{srp:{name:"SRP (Scaling & Root Planing)",tag:"PERIO",versions:[{id:"v1",label:"Standard",S:"Px referred for perio tx. Generalized bleeding gums.",O:"Perio charting: generalized PD {pd}mm, BOP+, subgingival calculus, bone loss {boneloss}%.",A:"Generalized {stage} periodontitis.",P:["LA: {quadrant}","SRP {quadrant} with ultrasonic + Gracey curettes","Irrigation, OHI given","Recall: remaining quadrants; re-eval {reeval}"]}]},perio_maint:{name:"Periodontal Maintenance (SPT)",tag:"PERIO",versions:[{id:"v1",label:"Standard",S:"Px for perio maintenance; hx treated periodontitis. No complaints.",O:"Re-charting: localized residual PD {pd}mm at {sites}; BOP {bop}%; stable vs prior.",A:"Stable periodontitis under maintenance.",P:["Full-mouth supra/subgingival debridement (ultrasonic + hand)","Localized SRP at residual pockets ({sites})","Polish, fluoride, OHI","Recall interval: {interval}"]}]},gtr:{name:"GTR (Guided Tissue Regeneration)",tag:"PERIO-SURG",versions:[{id:"v1",label:"Standard",S:"#{tooth} deep perio pocket, referred for regenerative tx.",O:"#{tooth} {wall} intrabony defect, PD {pd}mm, BOP+, vertical bone loss.",A:"#{tooth} localized intrabony defect, favorable for GTR.",P:["LA, intrasulcular incision, full-thickness flap (preserve papilla)","Degranulation, root planing, conditioning (EDTA)","Bone graft ({graft}) into defect","{membrane} over defect ± biologics ({biologic})","Tension-free primary closure; post-op CHX + antibiotic","Recall: suture removal 10–14d, re-eval 3–6 mo"]}]},crown_length:{name:"Crown Lengthening",tag:"PERIO-SURG",versions:[{id:"v1",label:"Esthetic",S:"Px c/o gummy smile / short teeth.",O:"Excessive gingival display, altered passive eruption. Bone sounding done.",A:"#{tooth} esthetic crown lengthening indicated.",P:["LA, gingivectomy / intrasulcular incision","Osseous recontouring to restore biologic width (~{bw}mm crest-to-margin)","Flap {flapPos} positioned, {suture} suture","Recall: suture removal 7–14d; heal {heal} before final prep"]},{id:"v2",label:"Functional",S:"#{tooth} subgingival caries/fracture, insufficient ferrule for crown.",O:"#{tooth} fracture extends subgingival, <2mm sound tooth above crest. Bone sounding done.",A:"#{tooth} functional crown lengthening to establish ferrule + biologic width.",P:["LA, full-thickness flap","Ostectomy/osteoplasty to expose ~4mm sound structure above crest","Flap {flapPos} positioned, {suture} suture","Recall: suture removal 7–14d; heal {heal} before final prep"]}]},frenectomy:{name:"Frenectomy",tag:"SOFT-TISSUE",versions:[{id:"v1",label:"Standard",S:"Midline diastema / high frenum attachment.",O:"Prominent {frenum} frenum with pull on interdental papilla / blanching on traction.",A:"Aberrant frenum attachment, frenectomy indicated.",P:["LA (local infiltration)","Frenum excised ({method})","Fibers released to periosteum","{closure}","Post-op instruction; recall 1–2 wks"]}]},ctg:{name:"CTG (Connective Tissue Graft)",tag:"SOFT-TISSUE",versions:[{id:"v1",label:"Standard",S:"#{tooth} gingival recession, root sensitivity, esthetic concern.",O:"#{tooth} {recClass} recession {recAmount}mm; adequate palatal donor.",A:"#{tooth} recession, root coverage via CTG indicated.",P:["LA recipient + donor (palate)","Recipient: {recipientDesign}; root conditioning","CTG harvested from palate, placed over root, sutured","Coronally advanced flap, sling suture","Donor: palatal stent/dressing; recall suture removal 10–14d"]}]},fgg:{name:"FGG (Free Gingival Graft)",tag:"SOFT-TISSUE",versions:[{id:"v1",label:"Standard",S:"#{tooth} minimal attached gingiva, progressing recession.",O:"#{tooth} inadequate KT (<{kt}mm), shallow vestibule, frenum pull.",A:"#{tooth} FGG to augment keratinized/attached gingiva.",P:["LA, recipient prep: partial-thickness bed apical to MGJ","FGG harvested from palate (epithelium + CT)","Graft sutured to periosteal bed, immobilized","Donor: hemostatic dressing/stent","Recall: suture removal 10–14d, eval KT gain"]}]}}},general:{label:"General & Other",items:{checkup:{name:"Regular Checkup",tag:"EXAM",versions:[{id:"v1",label:"Standard",S:"Px for routine recall exam, no complaints.",O:"EO/IO WNL. Restorations intact. No new caries clinically/radiographically ({xray}). Perio stable, PD ≤3mm.",A:"Healthy dentition, recall maintenance.",P:["Prophylaxis, fluoride varnish, OHI","Next recall {recall}"]}]},ortho:{name:"Orthodontics",tag:"ORTHO",versions:[{id:"v1",label:"Bonding / Adjustment",S:"Px c/o {complaint}, wants ortho tx.",O:"{classification}, crowding {crowding}mm, OJ {oj}mm, OB {ob}%. Records taken.",A:"{classification} malocclusion. Tx plan discussed.",P:["IC signed; brackets bonded {teeth}; {archwire} initial archwire","OHI given; recall {recall}","(Adjustment) archwire upsized; elastics Rx; progress noted","(Debond) brackets removed, polished; retainers delivered ({retainer})"]}]},tmd:{name:"TMD / Occlusal Splint",tag:"TMD",versions:[{id:"v1",label:"Standard",S:"Px c/o jaw pain, AM headaches, hx clenching/bruxism, clicking.",O:"MIO {mio}mm, {deviation}, {tmjFinding}, masseter/temporalis tenderness. Wear facets present.",A:"Myofascial pain + sleep bruxism. Stabilization splint indicated.",P:["Impressions/scan for {splintType} splint","Delivery: adjusted to even bilateral contacts in CR, canine guidance","Education: nighttime wear, self-care, reversible nature","Recall 1–2 wks for adjustment, re-eval"]}]}}}};
+
+/* ===== STORAGE ===== */
+function loadData(){
+  try{const s=localStorage.getItem('chartrx_v2');if(s)return JSON.parse(s);}catch(e){}
+  return {options:JSON.parse(JSON.stringify(DEFAULT_OPTIONS)),templates:JSON.parse(JSON.stringify(FACTORY_TEMPLATES))};
+}
+function saveData(){try{localStorage.setItem('chartrx_v2',JSON.stringify(appData));}catch(e){}}
+let appData=loadData();
+// ensure new factory keys exist if missing
+Object.keys(FACTORY_TEMPLATES).forEach(cat=>{
+  if(!appData.templates[cat])appData.templates[cat]=JSON.parse(JSON.stringify(FACTORY_TEMPLATES[cat]));
+  else Object.keys(FACTORY_TEMPLATES[cat].items).forEach(k=>{
+    if(!appData.templates[cat].items[k])appData.templates[cat].items[k]=JSON.parse(JSON.stringify(FACTORY_TEMPLATES[cat].items[k]));
+  });
+});
+let ACTIVE_OPTIONS=appData.options;
+let TEMPLATES=appData.templates;
+
+/* ===== SIDEBAR ===== */
+let activeKey=null,activeVer=null,openDropdown=null;
+const procList=document.getElementById('procList');
+const workspace=document.getElementById('workspace');
+
+function buildSidebar(filter=''){
+  procList.innerHTML='';
+  const f=filter.toLowerCase();
+  for(const catKey in TEMPLATES){
+    const cat=TEMPLATES[catKey];
+    const matches=Object.entries(cat.items).filter(([k,v])=>v.name.toLowerCase().includes(f)||v.tag.toLowerCase().includes(f));
+    if(!matches.length)continue;
+    const label=document.createElement('div');label.className='cat-label';label.textContent=cat.label;
+    procList.appendChild(label);
+    matches.forEach(([k,v])=>{
+      const isActive=activeKey===k;
+      const wrap=document.createElement('div');
+      const item=document.createElement('div');item.className='proc-item'+(isActive?' active':'');
+      item.innerHTML=`<span>${v.name}</span><span class="tag">${v.tag}</span>`;
+      item.onclick=()=>{
+        const firstVer=v.versions[0];
+        selectProc(catKey,k,firstVer.id);
+      };
+      wrap.appendChild(item);
+      if(isActive&&v.versions.length>1){
+        const verRow=document.createElement('div');verRow.className='ver-list';
+        v.versions.forEach(ver=>{
+          const pill=document.createElement('span');
+          pill.className='ver-pill'+(activeVer===ver.id?' active':'');
+          pill.textContent=ver.label;
+          pill.onclick=(e)=>{e.stopPropagation();selectProc(catKey,k,ver.id);};
+          verRow.appendChild(pill);
+        });
+        wrap.appendChild(verRow);
+      }
+      procList.appendChild(wrap);
+    });
+  }
+}
+
+function selectProc(catKey,key,verId){
+  activeKey=key;activeVer=verId;closeDropdown();
+  const t=TEMPLATES[catKey].items[key];
+  const ver=t.versions.find(v=>v.id===verId)||t.versions[0];
+  buildSidebar(document.getElementById('search').value);
+  const verLabel=t.versions.length>1?` — ${ver.label}`:'';
+  document.getElementById('topTitle').childNodes[0].nodeValue=t.name+verLabel;
+  document.getElementById('topSub').textContent='· '+TEMPLATES[catKey].label;
+  document.getElementById('copyBtn').style.display='flex';
+  document.getElementById('resetBtn').style.display='flex';
+  document.getElementById('fieldCount').style.display='inline-block';
+  const pHtml=ver.P.map(line=>`<li>${fieldify(line)}</li>`).join('');
+  workspace.innerHTML=`
+    <div class="chart-card">
+      <div class="chart-head"><div class="name">${t.name}${verLabel}</div><div class="cat">${t.tag}</div></div>
+      <div class="soap-block">
+        ${soapRow('S','Subjective',fieldify(ver.S))}
+        ${soapRow('O','Objective',fieldify(ver.O))}
+        ${soapRow('A','Assessment',fieldify(ver.A))}
+        ${soapRow('P','Plan','<ul>'+pHtml+'</ul>')}
+      </div>
+    </div>
+    <div class="hint">Tap a highlighted blank to choose from a list or type your own · tooth number fills across the chart</div>`;
+  attachFieldEvents();updateFieldCount();
+  // mobile: sync chart view directly (don't rely on MutationObserver timing)
+  if(isMobile()) setTimeout(()=>syncMobChart(), 30);
+}
+function soapRow(l,n,b){return`<div class="soap-row"><div class="soap-letter">${l}</div><div class="soap-body"><div class="soap-name">${n}</div><div class="soap-text">${b}</div></div></div>`;}
+function fieldify(text){return text.replace(/\{([^}]+)\}/g,(m,ph)=>`<span class="fld" data-ph="${ph}" data-val=""><span class="ph">${ph}</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></span>`);}
+
+/* ===== INLINE DROPDOWN ===== */
+function attachFieldEvents(){workspace.querySelectorAll('.fld').forEach(f=>{f.addEventListener('click',(e)=>{e.stopPropagation();openFieldDropdown(f);});});}
+function setFieldValue(fld,val){
+  fld.dataset.val=val;fld.classList.add('filled');
+  fld.innerHTML=`${esc(val)}<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>`;
+  fld.addEventListener('click',(e)=>{e.stopPropagation();openFieldDropdown(fld);});
+  if(fld.dataset.ph==='tooth'){workspace.querySelectorAll('.fld[data-ph="tooth"]').forEach(o=>{if(o!==fld&&!o.dataset.val)setFieldValue(o,val);});}
+  updateFieldCount();
+}
+function openFieldDropdown(fld){
+  if(openDropdown&&openDropdown._fld===fld){closeDropdown();return;}
+  closeDropdown();fld.classList.add('open');
+  const ph=fld.dataset.ph,opts=ACTIVE_OPTIONS[ph]||[];
+  const dd=document.createElement('div');dd.className='dropdown';dd._fld=fld;
+  const optHtml=opts.map(o=>`<div class="dd-opt">${esc(o)}</div>`).join('')||`<div class="dd-opt" style="font-style:italic;color:#a8a99c;cursor:default">Type a value below</div>`;
+  dd.innerHTML=`<div class="dd-head">${ph}</div><div class="dd-opts">${optHtml}</div><div class="dd-custom"><input type="text" placeholder="Custom…" value="${esc(fld.dataset.val||'')}"><button>Set</button></div>`;
+  document.body.appendChild(dd);positionDD(dd,fld);openDropdown=dd;
+  dd.querySelectorAll('.dd-opt').forEach(o=>{if(o.style.cursor==='default')return;o.onclick=()=>{setFieldValue(fld,o.textContent);closeDropdown();};});
+  const inp=dd.querySelector('input'),btn=dd.querySelector('button');
+  const commit=()=>{const v=inp.value.trim();if(v)setFieldValue(fld,v);closeDropdown();};
+  btn.onclick=commit;inp.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();commit();}if(e.key==='Escape')closeDropdown();};
+  let hl=-1;const optEls=[...dd.querySelectorAll('.dd-opt')].filter(o=>o.style.cursor!=='default');
+  dd.tabIndex=0;dd.onkeydown=(e)=>{if(e.key==='ArrowDown'){e.preventDefault();hl=Math.min(hl+1,optEls.length-1);paint();}if(e.key==='ArrowUp'){e.preventDefault();hl=Math.max(hl-1,0);paint();}if(e.key==='Enter'&&hl>=0){e.preventDefault();optEls[hl].click();}};
+  function paint(){optEls.forEach((o,i)=>o.classList.toggle('hl',i===hl));if(optEls[hl])optEls[hl].scrollIntoView({block:'nearest'});}
+  setTimeout(()=>{if(opts.length)dd.focus();else inp.focus();},10);
+}
+function positionDD(dd,fld){
+  const r=fld.getBoundingClientRect();let top=r.bottom+6,left=r.left;
+  setTimeout(()=>{const w=dd.offsetWidth,h=dd.offsetHeight;
+    if(left+w>window.innerWidth-12)left=window.innerWidth-w-12;
+    if(top+h>window.innerHeight-12)top=r.top-h-6;
+    dd.style.top=top+'px';dd.style.left=Math.max(12,left)+'px';
+  },0);
+}
+function closeDropdown(){if(openDropdown){openDropdown.remove();openDropdown=null;}workspace.querySelectorAll('.fld.open').forEach(f=>f.classList.remove('open'));}
+document.addEventListener('click',closeDropdown);
+window.addEventListener('resize',closeDropdown);
+workspace.addEventListener('scroll',()=>{if(openDropdown)positionDD(openDropdown,openDropdown._fld);});
+
+function updateFieldCount(){
+  const flds=workspace.querySelectorAll('.fld');
+  const filled=[...flds].filter(f=>f.dataset.val).length;
+  const total=flds.length;
+  document.getElementById('fieldCount').textContent=`${filled}/${total} filled`;
+  // show preview button once chart is loaded
+  const previewBtn=document.getElementById('previewBtn');
+  if(total>0){
+    previewBtn.style.display='flex';
+    if(filled===total){
+      previewBtn.classList.add('all-filled');
+      previewBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview`;
+    } else {
+      previewBtn.classList.remove('all-filled');
+    }
+  }
+  // sync mobile preview btn
+  const mobPreviewBtn=document.getElementById('mobPreviewBtn');
+  if(mobPreviewBtn&&total>0) mobPreviewBtn.style.display='flex';
+}
+
+/* ===================== PREVIEW MODAL ===================== */
+const previewOverlay=document.getElementById('previewOverlay');
+
+function openPreview(){
+  const card=workspace.querySelector('.chart-card');
+  if(!card){showToast('Select a procedure first');return;}
+  // collect current state from workspace fields
+  const pvData=collectChartData();
+  renderPreview(pvData);
+  previewOverlay.classList.add('show');
+}
+function closePreview(){previewOverlay.classList.remove('show');}
+
+function collectChartData(){
+  const card=workspace.querySelector('.chart-card');
+  const name=card.querySelector('.name').textContent;
+  const cat=card.querySelector('.cat').textContent;
+  const rows=[];
+  card.querySelectorAll('.soap-row').forEach(row=>{
+    const letter=row.querySelector('.soap-letter').textContent;
+    const nameEl=row.querySelector('.soap-name').textContent;
+    const body=row.querySelector('.soap-text');
+    const isList=!!body.querySelector('ul');
+    if(isList){
+      const steps=[...body.querySelectorAll('li')].map(li=>fieldText(li));
+      rows.push({letter,name:nameEl,type:'list',steps});
+    } else {
+      rows.push({letter,name:nameEl,type:'text',text:fieldText(body)});
+    }
+  });
+  // count unfilled
+  const unfilled=[...card.querySelectorAll('.fld')].filter(f=>!f.dataset.val).length;
+  return{name,cat,rows,unfilled};
+}
+
+function renderPreview(pvData){
+  document.getElementById('pvTitle').textContent=pvData.name;
+  document.getElementById('pvSub').textContent='Click any line to edit · changes stay until you clear the chart';
+  // unfilled badge
+  const badge=document.getElementById('pvUnfilled');
+  const countEl=document.getElementById('pvUnfilledCount');
+  if(pvData.unfilled>0){badge.style.display='inline-flex';countEl.textContent=pvData.unfilled;}
+  else{badge.style.display='none';}
+  const body=document.getElementById('pvBody');
+  body.innerHTML='';
+  pvData.rows.forEach((row,ri)=>{
+    const div=document.createElement('div');div.className='pv-row';
+    if(row.type==='text'){
+      div.innerHTML=`
+        <div class="pv-letter">${row.letter}</div>
+        <div class="pv-body">
+          <div class="pv-label">${row.name}</div>
+          <div class="pv-text" contenteditable="true" data-row="${ri}" spellcheck="false">${esc(row.text)}</div>
+        </div>`;
+      // sync edits back to workspace
+      div.querySelector('.pv-text').addEventListener('input',e=>{
+        syncPreviewToWorkspace(ri,'text',e.target.textContent);
+      });
+    } else {
+      const stepsHtml=row.steps.map((s,si)=>`
+        <div class="pv-step" data-si="${si}">
+          <span class="pv-step-bullet">–</span>
+          <textarea class="pv-step-text" data-row="${ri}" data-si="${si}" rows="1" spellcheck="false">${esc(s)}</textarea>
+          <span class="pv-step-del" data-row="${ri}" data-si="${si}">&times;</span>
+        </div>`).join('');
+      div.innerHTML=`
+        <div class="pv-letter">${row.letter}</div>
+        <div class="pv-body">
+          <div class="pv-label">${row.name}</div>
+          <div class="pv-text" data-type="list" data-row="${ri}">
+            <div class="pv-steps" id="pvSteps${ri}">${stepsHtml}</div>
+            <span class="pv-add-step" data-row="${ri}">+ Add step</span>
+          </div>
+        </div>`;
+      // auto-resize textareas
+      div.querySelectorAll('.pv-step-text').forEach(ta=>{
+        pvAutoResize(ta);
+        ta.addEventListener('input',()=>{
+          pvAutoResize(ta);
+          syncPreviewToWorkspace(ri,'step',null,+ta.dataset.si,ta.value);
+        });
+      });
+      // delete step
+      div.querySelectorAll('.pv-step-del').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          pvData.rows[ri].steps.splice(+btn.dataset.si,1);
+          renderPreview(pvData);
+          // refocus same row
+          setTimeout(()=>document.getElementById('pvBody').querySelectorAll(`.pv-step-text`)[0]?.focus(),30);
+        });
+      });
+      // add step
+      div.querySelector('.pv-add-step').addEventListener('click',()=>{
+        pvData.rows[ri].steps.push('');
+        renderPreview(pvData);
+        // focus new last textarea in this row
+        setTimeout(()=>{
+          const all=document.getElementById(`pvSteps${ri}`)?.querySelectorAll('.pv-step-text');
+          if(all?.length) all[all.length-1].focus();
+        },30);
+      });
+    }
+    body.appendChild(div);
+  });
+}
+
+function pvAutoResize(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
+
+function syncPreviewToWorkspace(rowIdx,type,textVal,stepIdx,stepVal){
+  // Find the corresponding soap-row in workspace and update field text or P steps
+  // For now we store edits in a separate map and use it in getPlainChart
+  if(!window._pvEdits)window._pvEdits={};
+  const key=`${rowIdx}`;
+  if(type==='text'){
+    if(!window._pvEdits[key])window._pvEdits[key]={};
+    window._pvEdits[key].text=textVal;
+  } else if(type==='step'){
+    if(!window._pvEdits[key])window._pvEdits[key]={steps:{}};
+    if(!window._pvEdits[key].steps)window._pvEdits[key].steps={};
+    window._pvEdits[key].steps[stepIdx]=stepVal;
+  }
+}
+
+
+// reset clears preview edits too
+document.getElementById('resetBtn').onclick=()=>{
+  closeDropdown();window._pvEdits={};
+  workspace.querySelectorAll('.fld').forEach(f=>{
+    f.dataset.val='';f.classList.remove('filled');
+    f.innerHTML=`<span class="ph">${f.dataset.ph}</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>`;
+    f.addEventListener('click',(e)=>{e.stopPropagation();openFieldDropdown(f);});
+  });
+  document.getElementById('previewBtn').classList.remove('all-filled');
+  updateFieldCount();
+};
+document.getElementById('copyBtn').onclick=()=>{navigator.clipboard.writeText(getPlainChart()).then(()=>showToast('Chart copied to clipboard'));};
+document.getElementById('previewBtn').onclick=openPreview;
+document.getElementById('pvClose').onclick=closePreview;
+document.getElementById('pvDoneBtn').onclick=closePreview;
+document.getElementById('pvCopyBtn').onclick=()=>{navigator.clipboard.writeText(getPlainChart()).then(()=>showToast('Copied'));};
+previewOverlay.addEventListener('click',(e)=>{if(e.target===previewOverlay)closePreview();});
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&previewOverlay.classList.contains('show'))closePreview();});
+
+document.getElementById('search').addEventListener('input',e=>buildSidebar(e.target.value));
+
+// ── core plain-text serialiser (single source of truth) ──────────────────
+function fieldText(node){
+  let s='';
+  node.childNodes.forEach(n=>{
+    if(n.nodeType===3)s+=n.textContent;
+    else if(n.classList&&n.classList.contains('fld')){const v=n.dataset.val;s+=v?v:`[${n.dataset.ph}]`;}
+  });
+  return s.replace(/\s+/g,' ').trim();
+}
+function getPlainChart(){
+  // 1. use preview edits if any
+  if(window._pvEdits&&Object.keys(window._pvEdits).length){
+    const pvData=collectChartData();
+    for(const key in window._pvEdits){
+      const ri=+key,e2=window._pvEdits[key];
+      if(pvData.rows[ri]){
+        if(e2.text!==undefined)pvData.rows[ri].text=e2.text;
+        if(e2.steps){for(const si in e2.steps)pvData.rows[ri].steps[+si]=e2.steps[+si];}
+      }
+    }
+    let out=pvData.name+'\n'+'='.repeat(pvData.name.length)+'\n\n';
+    pvData.rows.forEach(row=>{
+      if(row.type==='list'){out+=row.letter+':\n'+row.steps.map(s=>'  - '+s).join('\n')+'\n\n';}
+      else{out+=row.letter+': '+row.text+'\n\n';}
+    });
+    return out.trim();
+  }
+  // 2. mobile clone
+  if(isMobile()){
+    const scroll=document.getElementById('mobChartScroll');
+    const card=scroll&&scroll.querySelector('.chart-card');
+    if(card){
+      const name=card.querySelector('.name').textContent;
+      let out=name+'\n'+'='.repeat(name.length)+'\n\n';
+      card.querySelectorAll('.soap-row').forEach(row=>{
+        const l=row.querySelector('.soap-letter').textContent,body=row.querySelector('.soap-text');
+        if(body.querySelector('ul')){out+=l+':\n'+[...body.querySelectorAll('li')].map(li=>'  - '+fieldText(li)).join('\n')+'\n\n';}
+        else{out+=l+': '+fieldText(body)+'\n\n';}
+      });
+      return out.trim();
+    }
+  }
+  // 3. desktop workspace
+  const card=workspace.querySelector('.chart-card');
+  if(!card)return'';
+  const name=card.querySelector('.name').textContent;
+  let out=name+'\n'+'='.repeat(name.length)+'\n\n';
+  card.querySelectorAll('.soap-row').forEach(row=>{
+    const l=row.querySelector('.soap-letter').textContent,body=row.querySelector('.soap-text');
+    if(body.querySelector('ul')){out+=l+':\n'+[...body.querySelectorAll('li')].map(li=>'  - '+fieldText(li)).join('\n')+'\n\n';}
+    else{out+=l+': '+fieldText(body)+'\n\n';}
+  });
+  return out.trim();
+}
+// ─────────────────────────────────────────────────────────────────────────
+
+/* ===== SETTINGS MODAL ===== */
+const settingsModal=document.getElementById('settingsModal');
+document.getElementById('settingsBtn').onclick=()=>openSettings('templates');
+document.getElementById('closeSettings').onclick=()=>settingsModal.classList.remove('show');
+settingsModal.onclick=(e)=>{if(e.target===settingsModal)settingsModal.classList.remove('show');};
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&settingsModal.classList.contains('show'))settingsModal.classList.remove('show');});
+document.querySelectorAll('.tab').forEach(tab=>{tab.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));tab.classList.add('active');document.getElementById('tab-'+tab.dataset.tab).classList.add('active');if(tab.dataset.tab==='templates')renderTplSidebar();if(tab.dataset.tab==='options')renderOptions('');};});
+function openSettings(tab='templates'){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+tab));settingsModal.classList.add('show');if(tab==='templates')renderTplSidebar();if(tab==='options')renderOptions('');}
+
+/* ===== TEMPLATE EDITOR ===== */
+let editingCat=null,editingKey=null,editingVerId=null;
+function renderTplSidebar(){
+  const sb=document.getElementById('tplSidebar');sb.innerHTML='';
+  for(const catKey in TEMPLATES){
+    const cat=TEMPLATES[catKey];
+    const cl=document.createElement('div');cl.className='tpl-cat';cl.textContent=cat.label;sb.appendChild(cl);
+    for(const k in cat.items){
+      const t=cat.items[k];
+      const pw=document.createElement('div');pw.className='tpl-proc';
+      const pn=document.createElement('div');pn.className='tpl-proc-name';pn.textContent=t.name;pw.appendChild(pn);
+      const vl=document.createElement('div');vl.className='tpl-versions';
+      t.versions.forEach(ver=>{
+        const vr=document.createElement('div');
+        vr.className='tpl-ver'+(editingCat===catKey&&editingKey===k&&editingVerId===ver.id?' active':'');
+        vr.innerHTML=`<span>${ver.label}</span><span class="ver-del" title="Delete version">&times;</span>`;
+        vr.onclick=(e)=>{if(!e.target.classList.contains('ver-del')){editingCat=catKey;editingKey=k;editingVerId=ver.id;renderTplSidebar();renderTplEditor();}};
+        vr.querySelector('.ver-del').onclick=(e)=>{e.stopPropagation();
+          if(t.versions.length<=1){showToast('Must keep at least one version');return;}
+          if(!confirm(`Delete version "${ver.label}"?`))return;
+          t.versions=t.versions.filter(v=>v.id!==ver.id);
+          if(editingVerId===ver.id){editingVerId=t.versions[0].id;}
+          saveData();renderTplSidebar();renderTplEditor();
+        };
+        vl.appendChild(vr);
+      });
+      const addBtn=document.createElement('button');addBtn.className='add-ver-btn';addBtn.textContent='+ New version';
+      addBtn.onclick=()=>{
+        const label=prompt('Version name (e.g. "Simple", "Surgical"):');
+        if(!label)return;
+        const existing=t.versions.find(v=>v.id===t.versions[t.versions.length-1].id);
+        const newVer={...JSON.parse(JSON.stringify(existing)),id:'v'+Date.now(),label};
+        t.versions.push(newVer);editingCat=catKey;editingKey=k;editingVerId=newVer.id;
+        saveData();renderTplSidebar();renderTplEditor();showToast(`Version "${label}" created`);
+      };
+      vl.appendChild(addBtn);pw.appendChild(vl);sb.appendChild(pw);
+    }
+  }
+}
+
+const COMMON_PH=['tooth','anesthetic','dose','technique','suture','graft','membrane','shade','cement','recall'];
+function renderTplEditor(){
+  const ed=document.getElementById('tplEditor');
+  if(!editingCat||!editingKey||!editingVerId){ed.innerHTML='<div class="tpl-editor-empty">Select a version to edit</div>';return;}
+  const t=TEMPLATES[editingCat].items[editingKey];
+  const ver=t.versions.find(v=>v.id===editingVerId);
+  if(!ver){ed.innerHTML='<div class="tpl-editor-empty">Version not found</div>';return;}
+
+  const phHelperHtml=COMMON_PH.map(p=>`<span class="ph-chip" data-ph="${p}">{${p}}</span>`).join('');
+
+  ed.innerHTML=`
+    <div class="tpl-editor-head">
+      <input class="tpl-ver-name-input" id="verNameInput" value="${esc(ver.label)}" placeholder="Version name">
+      <div class="tpl-editor-actions">
+        <button class="btn danger" id="resetVerBtn">Reset to default</button>
+      </div>
+    </div>
+    ${editorBlock('S','Subjective','soap-S',ver.S)}
+    ${editorBlock('O','Objective','soap-O',ver.O)}
+    ${editorBlock('A','Assessment','soap-A',ver.A)}
+    <div class="soap-editor-block">
+      <div class="soap-editor-head"><div class="soap-editor-letter">P</div><div class="soap-editor-label">Plan — Steps</div></div>
+      <div class="soap-editor-body">
+        <div class="step-list" id="stepList">${ver.P.map((s,i)=>stepRow(s,i)).join('')}</div>
+        <button class="add-step-btn" id="addStepBtn">+ Add step</button>
+        <div style="margin-top:12px"><span class="ph-label">Insert placeholder:</span><div class="ph-helper" id="phHelperP">${phHelperHtml}</div></div>
+      </div>
+    </div>`;
+
+  // version name
+  document.getElementById('verNameInput').oninput=(e)=>{ver.label=e.target.value;saveData();renderTplSidebar();};
+  // soap textarea listeners
+  ['S','O','A'].forEach(key=>{
+    const ta=document.getElementById('soap-'+key);
+    ta.oninput=()=>{ver[key]=ta.value;saveData();};
+    // ph helper
+    document.getElementById('phHelper'+key).querySelectorAll('.ph-chip').forEach(chip=>{
+      chip.onclick=()=>insertAtCursor(ta,`{${chip.dataset.ph}}`);
+    });
+  });
+  // step list
+  attachStepListeners(ver);
+  document.getElementById('addStepBtn').onclick=()=>{ver.P.push('');saveData();renderTplEditor();setTimeout(()=>{const inputs=document.querySelectorAll('.step-input');if(inputs.length)inputs[inputs.length-1].focus();},50);};
+  document.getElementById('phHelperP').querySelectorAll('.ph-chip').forEach(chip=>{
+    chip.onclick=()=>{const active=document.querySelector('.step-input:focus');if(active)insertAtCursor(active,`{${chip.dataset.ph}}`);else showToast('Click a step first, then insert');};
+  });
+  // reset to default
+  document.getElementById('resetVerBtn').onclick=()=>{
+    const factCat=FACTORY_TEMPLATES[editingCat];
+    if(!factCat){showToast('No factory template found');return;}
+    const factItem=factCat.items[editingKey];
+    if(!factItem){showToast('No factory template found');return;}
+    const factVer=factItem.versions.find(v=>v.id===ver.id)||factItem.versions[0];
+    if(!confirm(`Reset "${ver.label}" to factory defaults? Current edits will be lost.`))return;
+    ver.S=factVer.S;ver.O=factVer.O;ver.A=factVer.A;ver.P=[...factVer.P];
+    saveData();renderTplEditor();showToast('Reset to factory default');
+  };
+}
+function editorBlock(letter,name,id,value){
+  const phHtml=COMMON_PH.map(p=>`<span class="ph-chip" data-ph="${p}">{${p}}</span>`).join('');
+  return`<div class="soap-editor-block">
+    <div class="soap-editor-head"><div class="soap-editor-letter">${letter}</div><div class="soap-editor-label">${name}</div></div>
+    <div class="soap-editor-body">
+      <textarea class="soap-textarea" id="${id}" rows="2">${esc(value)}</textarea>
+      <div style="margin-top:8px"><span class="ph-label">Insert placeholder:</span><div class="ph-helper" id="phHelper${letter}">${phHtml}</div></div>
+    </div>
+  </div>`;
+}
+function stepRow(text,i){
+  return`<div class="step-row" draggable="true" data-idx="${i}">
+    <span class="step-drag" title="Drag to reorder">⠿</span>
+    <textarea class="step-input" rows="1" data-idx="${i}">${esc(text)}</textarea>
+    <span class="step-del" data-idx="${i}" title="Remove step">&times;</span>
+  </div>`;}
+function attachStepListeners(ver){
+  const list=document.getElementById('stepList');
+  list.querySelectorAll('.step-input').forEach((inp,i)=>{
+    autoResize(inp);
+    inp.oninput=()=>{ver.P[i]=inp.value;saveData();};
+    inp.oninput();
+  });
+  list.querySelectorAll('.step-del').forEach(btn=>{
+    btn.onclick=()=>{const i=+btn.dataset.idx;if(ver.P.length<=1){showToast('Must keep at least one step');return;}ver.P.splice(i,1);saveData();renderTplEditor();};
+  });
+  // drag-to-reorder
+  let dragIdx=null;
+  list.querySelectorAll('.step-row').forEach(row=>{
+    row.ondragstart=(e)=>{dragIdx=+row.dataset.idx;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
+    row.ondragend=()=>list.querySelectorAll('.step-row').forEach(r=>{r.classList.remove('dragging','drag-over');});
+    row.ondragover=(e)=>{e.preventDefault();row.classList.add('drag-over');};
+    row.ondragleave=()=>row.classList.remove('drag-over');
+    row.ondrop=(e)=>{e.preventDefault();const dropIdx=+row.dataset.idx;if(dragIdx===null||dragIdx===dropIdx)return;const moved=ver.P.splice(dragIdx,1)[0];ver.P.splice(dropIdx,0,moved);dragIdx=null;saveData();renderTplEditor();};
+  });
+}
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';el.oninput=function(){this.style.height='auto';this.style.height=this.scrollHeight+'px';const old=el.oninput;el.oninput=function(){this.style.height='auto';this.style.height=this.scrollHeight+'px';if(old&&old!==el.oninput)old.call(this);};};}
+function insertAtCursor(el,text){const s=el.selectionStart,e2=el.selectionEnd;el.value=el.value.slice(0,s)+text+el.value.slice(e2);el.selectionStart=el.selectionEnd=s+text.length;el.dispatchEvent(new Event('input'));el.focus();}
+
+/* ===== OPTIONS TAB ===== */
+function renderOptions(filter){
+  const f=(filter||'').toLowerCase();const body=document.getElementById('optBody');body.innerHTML='';
+  const keys=Object.keys(ACTIVE_OPTIONS).sort((a,b)=>{const la=(PH_LABELS[a]||a).toLowerCase(),lb=(PH_LABELS[b]||b).toLowerCase();return la<lb?-1:1;});
+  let shown=0;
+  keys.forEach(key=>{
+    const label=PH_LABELS[key]||key;
+    if(f&&!label.toLowerCase().includes(f)&&!key.toLowerCase().includes(f))return;
+    shown++;
+    const g=document.createElement('div');g.className='opt-group';
+    const chips=ACTIVE_OPTIONS[key].map((opt,i)=>`<span class="opt-chip"><span>${esc(opt)}</span><span class="del" data-key="${key}" data-idx="${i}">&times;</span></span>`).join('');
+    g.innerHTML=`<div class="opt-group-head"><span class="opt-group-label">${label}</span><span class="opt-group-key">{${key}}</span></div><div class="opt-chips">${chips}<span class="opt-add"><input type="text" placeholder="+ add" data-addkey="${key}"></span></div>`;
+    body.appendChild(g);
+  });
+  if(!shown)body.innerHTML='<div style="padding:40px;text-align:center;color:var(--ink-soft);font-style:italic">No matching fields.</div>';
+  body.querySelectorAll('.del').forEach(d=>{d.onclick=()=>{ACTIVE_OPTIONS[d.dataset.key].splice(+d.dataset.idx,1);saveData();renderOptions(document.getElementById('optSearch').value);};});
+  body.querySelectorAll('.opt-add input').forEach(inp=>{inp.onkeydown=(e)=>{if(e.key==='Enter'){const v=inp.value.trim();if(!v)return;const k=inp.dataset.addkey;if(!ACTIVE_OPTIONS[k].includes(v))ACTIVE_OPTIONS[k].push(v);saveData();renderOptions(document.getElementById('optSearch').value);setTimeout(()=>{const again=document.querySelector(`.opt-add input[data-addkey="${k}"]`);if(again)again.focus();},20);}};});
+}
+document.getElementById('optSearch').addEventListener('input',e=>renderOptions(e.target.value));
+document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({options:ACTIVE_OPTIONS,templates:TEMPLATES},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='chartrx-settings.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);showToast('Settings exported');};
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=(e)=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const p=JSON.parse(reader.result);if(p.options)appData.options=ACTIVE_OPTIONS=p.options;if(p.templates)appData.templates=TEMPLATES=p.templates;saveData();renderTplSidebar();renderOptions(document.getElementById('optSearch').value);showToast('Settings imported');}catch(err){showToast('Invalid file');}};reader.readAsText(file);e.target.value='';};
+document.getElementById('resetDefaultsBtn').onclick=()=>{if(!confirm('Reset ALL options AND templates to factory defaults? All custom edits will be lost.'))return;appData={options:JSON.parse(JSON.stringify(DEFAULT_OPTIONS)),templates:JSON.parse(JSON.stringify(FACTORY_TEMPLATES))};ACTIVE_OPTIONS=appData.options;TEMPLATES=appData.templates;saveData();renderTplSidebar();renderTplEditor();renderOptions('');buildSidebar();showToast('Reset to factory defaults');};
+
+/* ===== UTILS ===== */
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+
+/* ===================== MOBILE LOGIC ===================== */
+const isMobile=()=>window.innerWidth<=700;
+
+function mobShowPanel(which){
+  if(!isMobile())return;
+  const procPanel=document.getElementById('mobProcPanel');
+  const visitPanel=document.getElementById('mobVisitPanel');
+  const chartView=document.getElementById('mobChartView');
+  ['mobNavProc','mobNavVisit','mobNavChart','mobNavSettings'].forEach(id=>{
+    document.getElementById(id)?.classList.remove('active');
+  });
+  if(which==='proc'){
+    document.getElementById('mobNavProc').classList.add('active');
+    procPanel.classList.add('open'); procPanel.style.transform='';
+    if(visitPanel){visitPanel.classList.remove('open');visitPanel.style.transform='translateX(-100%)';}
+    chartView.classList.remove('open');
+  } else if(which==='visit'){
+    document.getElementById('mobNavVisit').classList.add('active');
+    if(visitPanel){visitPanel.classList.add('open');visitPanel.style.transform='';}
+    procPanel.classList.remove('open');
+    chartView.classList.remove('open');
+    buildMobVnSidebar('');
+  } else if(which==='chart'){
+    document.getElementById('mobNavChart').classList.add('active');
+    procPanel.classList.remove('open');
+    if(visitPanel){visitPanel.classList.remove('open');visitPanel.style.transform='translateX(-100%)';}
+    chartView.classList.add('open');
+  }
+}
+
+function buildMobSidebar(filter=''){
+  const list=document.getElementById('mobProcList');list.innerHTML='';
+  const f=filter.toLowerCase();
+  for(const catKey in TEMPLATES){
+    const cat=TEMPLATES[catKey];
+    const matches=Object.entries(cat.items).filter(([k,v])=>v.name.toLowerCase().includes(f)||v.tag.toLowerCase().includes(f));
+    if(!matches.length)continue;
+    const lbl=document.createElement('div');lbl.className='cat-label';lbl.textContent=cat.label;list.appendChild(lbl);
+    matches.forEach(([k,v])=>{
+      const isActive=activeKey===k;
+      const wrap=document.createElement('div');
+      const item=document.createElement('div');
+      item.className='proc-item'+(isActive?' active':'');
+      item.innerHTML=`<span>${v.name}</span><span class="tag">${v.tag}</span>`;
+      item.onclick=()=>{
+        if(v.versions.length>1){openMobVerSheet(catKey,k);}
+        else{selectProc(catKey,k,v.versions[0].id);mobShowPanel('chart');}
+      };
+      wrap.appendChild(item);
+      if(isActive&&v.versions.length>1){
+        const verRow=document.createElement('div');verRow.className='ver-list';
+        v.versions.forEach(ver=>{
+          const pill=document.createElement('span');
+          pill.className='ver-pill'+(activeVer===ver.id?' active':'');
+          pill.textContent=ver.label;
+          pill.onclick=(e)=>{e.stopPropagation();selectProc(catKey,k,ver.id);mobShowPanel('chart');};
+          verRow.appendChild(pill);
+        });
+        wrap.appendChild(verRow);
+      }
+      list.appendChild(wrap);
+    });
+  }
+}
+
+let _mobVerCat=null,_mobVerKey=null;
+function openMobVerSheet(catKey,key){
+  _mobVerCat=catKey;_mobVerKey=key;
+  const t=TEMPLATES[catKey].items[key];
+  document.getElementById('mobVerSheetTitle').textContent=t.name;
+  const vl=document.getElementById('mobVerList');vl.innerHTML='';
+  t.versions.forEach(ver=>{
+    const item=document.createElement('div');
+    const isAct=activeVer===ver.id&&activeKey===key;
+    item.className='mob-ver-item'+(isAct?' active':'');
+    item.innerHTML=`<span>${ver.label}</span>${isAct?'<span class="check">✓</span>':''}`;
+    item.onclick=()=>{selectProc(catKey,key,ver.id);closeMobVerSheet();mobShowPanel('chart');};
+    vl.appendChild(item);
+  });
+  document.getElementById('mobVerSheet').classList.add('open');
+  document.getElementById('mobSheetOverlay').classList.add('open');
+}
+function closeMobVerSheet(){
+  document.getElementById('mobVerSheet').classList.remove('open');
+  document.getElementById('mobSheetOverlay').classList.remove('open');
+}
+
+function syncMobChart(){
+  if(!isMobile())return;
+  const title=document.getElementById('topTitle').childNodes[0].nodeValue||'';
+  document.getElementById('mobChartTitle').textContent=title.trim();
+  const card=workspace.querySelector('.chart-card');
+  const scroll=document.getElementById('mobChartScroll');
+  if(card){
+    scroll.innerHTML='';
+    const clone=card.cloneNode(true);
+    scroll.appendChild(clone);
+    const hint=document.createElement('div');hint.className='hint';
+    hint.textContent='Tap a highlighted blank to pick from a list or type your own';
+    scroll.appendChild(hint);
+    // reattach click events on cloned fields
+    clone.querySelectorAll('.fld').forEach(f=>{
+      // sync values from original
+      const orig=workspace.querySelector(`.fld[data-ph="${f.dataset.ph}"]`);
+      f.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        // open dropdown on original, mirror back to clone after selection
+        openMobFieldDropdown(f);
+      });
+    });
+    document.getElementById('mobCopyBtn').style.display='flex';
+    document.getElementById('mobResetBtn').style.display='flex';
+  }
+  buildMobSidebar(document.getElementById('mobSearch').value);
+}
+
+// Mobile-aware dropdown: open from clone field, write back to clone
+function openMobFieldDropdown(clonedFld){
+  closeDropdown();
+  clonedFld.classList.add('open');
+  const ph=clonedFld.dataset.ph,opts=ACTIVE_OPTIONS[ph]||[];
+  const dd=document.createElement('div');dd.className='dropdown';dd._fld=clonedFld;
+  const optHtml=opts.map(o=>`<div class="dd-opt">${esc(o)}</div>`).join('')||`<div class="dd-opt" style="font-style:italic;color:#a8a99c;cursor:default">Type a value below</div>`;
+  dd.innerHTML=`<div class="dd-head">${ph}</div><div class="dd-opts">${optHtml}</div><div class="dd-custom"><input type="text" placeholder="Custom…" inputmode="text" value="${esc(clonedFld.dataset.val||'')}"><button>Set</button></div>`;
+  document.body.appendChild(dd);openDropdown=dd;
+  const setVal=(val)=>{
+    clonedFld.dataset.val=val;clonedFld.classList.add('filled');
+    clonedFld.innerHTML=`${esc(val)}<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>`;
+    clonedFld.addEventListener('click',(e)=>{e.stopPropagation();openMobFieldDropdown(clonedFld);});
+    // also set on original hidden workspace
+    const orig=workspace.querySelector(`.fld[data-ph="${ph}"]`);
+    if(orig)setFieldValue(orig,val);
+    // auto-fill same ph in clone
+    if(ph==='tooth'){document.getElementById('mobChartScroll').querySelectorAll(`.fld[data-ph="tooth"]`).forEach(o=>{if(o!==clonedFld&&!o.dataset.val){o.dataset.val=val;o.classList.add('filled');o.innerHTML=`${esc(val)}<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>`;o.addEventListener('click',(e)=>{e.stopPropagation();openMobFieldDropdown(o);});}});}
+    // update count
+    const flds=document.getElementById('mobChartScroll').querySelectorAll('.fld');
+    const filled=[...flds].filter(f=>f.dataset.val).length;
+    document.getElementById('fieldCount').textContent=`${filled}/${flds.length} filled`;
+    document.getElementById('fieldCount').style.display='inline-block';
+    closeDropdown();
+  };
+  dd.querySelectorAll('.dd-opt').forEach(o=>{if(o.style.cursor==='default')return;o.onclick=()=>setVal(o.textContent);});
+  const inp=dd.querySelector('input'),btn=dd.querySelector('button');
+  btn.onclick=()=>{const v=inp.value.trim();if(v)setVal(v);else closeDropdown();};
+  inp.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();const v=inp.value.trim();if(v)setVal(v);else closeDropdown();}if(e.key==='Escape')closeDropdown();};
+  setTimeout(()=>inp.focus(),100);
+}
+
+
+document.getElementById('mobCopyBtn').onclick=()=>{navigator.clipboard.writeText(getPlainChart()).then(()=>showToast('Chart copied'));};
+document.getElementById('mobResetBtn').onclick=()=>{
+  // reset original workspace fields
+  window._pvEdits={};
+  workspace.querySelectorAll('.fld').forEach(f=>{f.dataset.val='';f.classList.remove('filled');f.innerHTML=`<span class="ph">${f.dataset.ph}</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>`;f.addEventListener('click',(e)=>{e.stopPropagation();openFieldDropdown(f);});});
+  updateFieldCount();
+  syncMobChart();
+};
+document.getElementById('mobPreviewBtn').onclick=openPreview;
+document.getElementById('mobSearch').addEventListener('input',e=>buildMobSidebar(e.target.value));
+
+// Sync mobile chart after workspace changes
+const wsObserver=new MutationObserver(()=>{if(isMobile())syncMobChart();});
+wsObserver.observe(workspace,{childList:true,subtree:false});
+
+// Settings close → restore mobile nav
+document.getElementById('closeSettings').addEventListener('click',()=>{
+  if(isMobile()){const hasChart=!!workspace.querySelector('.chart-card');document.getElementById('mobNavSettings').classList.remove('active');if(hasChart)mobShowPanel('chart');else mobShowPanel('proc');}
+});
+settingsModal.addEventListener('click',(e)=>{
+  if(e.target===settingsModal&&isMobile()){const hasChart=!!workspace.querySelector('.chart-card');document.getElementById('mobNavSettings').classList.remove('active');if(hasChart)mobShowPanel('chart');else mobShowPanel('proc');}
+});
+// hook settings btn mobile nav
+document.getElementById('settingsBtn').onclick=()=>{
+  openSettings('templates');
+  if(isMobile())document.getElementById('mobNavSettings').classList.add('active');
+};
+document.querySelectorAll('.mob-nav-btn').forEach(b=>{
+  b.id==='mobNavSettings'&&(b.onclick=()=>{
+    openSettings('templates');
+    document.getElementById('mobNavSettings').classList.add('active');
+  });
+});
+
+/* ===================== VISIT NOTES ===================== */
+const VN_TEMPLATES={restorative:{label:'Restorative & Pros',items:{direct_resto:{name:'Direct Restoration',tag:'FILL',visits:[{id:'v1',label:'Restoration',S:'Px c/o {complaint} #{tooth}.',O:'#{tooth} {surface} caries, ICDAS {grade}. PA: {pa}. Vitality: {vitality}.',A:'#{tooth} {diagnosis}.',steps:['LA: {anesthetic} {dose} ({technique})','Rubber dam isolation','Caries excavation — {prep} cavity prep','Etch, bond, composite shade {shade}, incremental curing','Occlusal adjustment, polish','Post-op instructions given'],outcome:'#{tooth} direct composite completed. No complications.',next:'Recall {recall}'}]},fixed_pros:{name:'Fixed Pros (Crown)',tag:'CROWN',visits:[{id:'v1',label:'V1 — Preparation',S:'Px for #{tooth} crown preparation.',O:'#{tooth} {existing}, structurally compromised. Vital, no PARL.',A:'#{tooth} full coverage crown indicated.',steps:['LA: {anesthetic} {dose}','Core build-up','Full crown prep — {margin} margin, occlusal reduction {reduction}mm','Retraction cord; final impression/scan','Shade {shade}; provisional cemented (Temp-Bond)','Occlusion verified'],outcome:'Prep completed. Impression to lab.',next:'Crown delivery {recall}'},{id:'v2',label:'V2 — Crown Delivery',S:'Px for #{tooth} crown delivery. No complaints with provisional.',O:'#{tooth} provisional intact. Tissue healthy.',A:'#{tooth} crown delivery.',steps:['Provisional removed; temp cement cleaned','Crown try-in: margin, contact, occlusion verified','Cemented: {cement}','Excess cement removed; floss confirmed','Post-op instructions'],outcome:'#{tooth} crown cemented successfully.',next:'Recall {recall}'}]},indirect_resto:{name:'Indirect Restoration (Inlay/Onlay)',tag:'INLAY',visits:[{id:'v1',label:'V1 — Prep',S:'Px for #{tooth} {restoType} prep.',O:'#{tooth} large existing restoration/caries. Vital.',A:'#{tooth} {restoType} indicated.',steps:['LA: {anesthetic} {dose}','Caries removal; prep','Impression/scan; shade {shade}; temp'],outcome:'Prep done. To lab.',next:'Delivery {recall}'},{id:'v2',label:'V2 — Delivery',S:'Px for #{tooth} {restoType} delivery.',O:'Temp intact.',A:'#{tooth} {restoType} delivery.',steps:['Temp removed','Try-in: margin, contact, occlusion OK','Cemented: {cement}; adjusted; polished'],outcome:'#{tooth} {restoType} cemented.',next:'Recall {recall}'}]},ssc:{name:'SSC',tag:'PEDO',visits:[{id:'v1',label:'SSC Placement',S:'Pediatric Px #{tooth} SSC. Consent obtained.',O:'#{tooth} deep caries, vital. No PARL.',A:'#{tooth} SSC indicated.',steps:['LA: {anesthetic} {dose}','Rubber dam','Caries removal ± pulpotomy ({medicament})','Occlusal/proximal reduction','SSC ({size}) contoured, crimped, cemented (GI)','Occlusion + floss checked','Post-op to parent'],outcome:'#{tooth} SSC placed.',next:'6-month recall'}]},removable_pros:{name:'Removable Pros',tag:'DENTURE',visits:[{id:'v1',label:'V1 — Prelim Impression',S:'Px for {prosType}.',O:'{archDesc}.',A:'{prosType} initiated.',steps:['Alginate impression','Custom tray fabricated','OHI'],outcome:'Prelim impression done.',next:'Final impression'},{id:'v2',label:'V2 — Final Impression',S:'Px for final impression.',O:'Custom tray fits.',A:'Final impression.',steps:['Border molding','Final impression (PVS)','Jaw relation: VD, CR, midline'],outcome:'Final impression to lab.',next:'Try-in'},{id:'v3',label:'V3 — Try-In',S:'Px for prosthesis try-in.',O:'Wax try-in evaluated.',A:'{prosType} try-in.',steps:['Try-in: esthetics, occlusion, VD, phonetics','Patient approved'],outcome:'Try-in approved.',next:'Delivery'},{id:'v4',label:'V4 — Delivery',S:'Px for {prosType} delivery.',O:'Final prosthesis from lab.',A:'{prosType} delivery.',steps:['Fit checked; pressure spots relieved (PIP)','Occlusion balanced','Insertion + care instructions'],outcome:'{prosType} delivered.',next:'24–48h follow-up'},{id:'v5',label:'V5 — Adjustment',S:'Px c/o {complaint} with prosthesis.',O:'Pressure area at {site}.',A:'Adjustment.',steps:['Pressure spots relieved','Occlusal adjustment','Reline PRN'],outcome:'Adjustment done.',next:'Recall 3–6 mo'}]}}},endo:{label:'Endodontics',items:{rct:{name:'RCT (Conventional)',tag:'ENDO',visits:[{id:'v1',label:'V1 — Access & Instrumentation',S:'#{tooth} c/o spontaneous/lingering pain. Pain {pain}/10.',O:'#{tooth} TTP+; lingering cold; PARL on PA.',A:'#{tooth} symptomatic irreversible pulpitis / apical periodontitis.',steps:['LA: {anesthetic} {dose} ({technique})','Rubber dam isolation','Access opening; pulp chamber unroofed','{canals} canal(s) located; WL — {wl}','Rotary NiTi to {size}','Irrigation: NaOCl, EDTA, saline','CaOH₂ medicament; Cavit temp','Post-op Rx {rx}'],outcome:'WL confirmed. Canals shaped. Temporized.',next:'Obturation {recall}'},{id:'v2',label:'V2 — Obturation',S:'#{tooth} post-op: {symptom}. Pain {pain}/10.',O:'Canals dry on paper point. Symptoms resolved.',A:'#{tooth} ready for obturation.',steps:['LA: {anesthetic} {dose}','Rubber dam; temp removed','Re-irrigated (NaOCl + EDTA); dried','Master cone fit verified','Obturation: {technique_obt} — GP + sealer','Post-obturation PA — condensation to WL confirmed','Access sealed (GI/composite)','Definitive restoration advised'],outcome:'Obturation complete. PA satisfactory.',next:'Crown recommended'}]},pulpotomy:{name:'Pulpotomy (primary)',tag:'PEDO',visits:[{id:'v1',label:'Pulpotomy',S:'#{tooth} pain/caries. Pediatric Px.',O:'#{tooth} carious exposure; vital coronal pulp; no PARL.',A:'#{tooth} pulpotomy indicated.',steps:['LA: {anesthetic} {dose}','Rubber dam','Caries removal, coronal amputation','Hemostasis <5 min','{medicament} applied','GI base; SSC ({size}) cemented'],outcome:'#{tooth} pulpotomy + SSC completed.',next:'6-month PA recall'}]},pulpectomy:{name:'Pulpectomy (primary RCT)',tag:'PEDO',visits:[{id:'v1',label:'V1 — Pulpectomy',S:'#{tooth} pain, swelling. Pediatric Px.',O:'#{tooth} necrotic; fistula; PARL.',A:'#{tooth} pulpectomy indicated.',steps:['LA; rubber dam; access','Canals negotiated; WL estimated','Instrumentation; NaOCl irrigation','CaOH₂/Vitapex; temp'],outcome:'Canals medicated.',next:'Obturation + SSC {recall}'},{id:'v2',label:'V2 — Obturation + SSC',S:'#{tooth} symptoms resolved.',O:'Fistula resolved.',A:'#{tooth} obturation + SSC.',steps:['LA; rubber dam','Canals obturated {fillMaterial}','PA confirmed','SSC ({size}) cemented'],outcome:'#{tooth} pulpectomy + SSC complete.',next:'6-month recall'}]},vpt:{name:'Vital Pulp Therapy',tag:'VPT',visits:[{id:'v1',label:'VPT',S:'#{tooth} deep caries, {symptom}.',O:'#{tooth} {exposure}. Hemostasis <5 min. Vital.',A:'#{tooth} {vptType}.',steps:['LA: {anesthetic} {dose}','Rubber dam','Caries removed; {exposure}','Hemostasis confirmed','{capMaterial} over {site}','GI base; composite shade {shade}','Occlusion adjusted'],outcome:'#{tooth} {vptType} completed.',next:'Vitality recall {recall}'}]},apicoectomy:{name:'Apicoectomy',tag:'SURG-ENDO',visits:[{id:'v1',label:'Surgery',S:'#{tooth} persistent PARL despite RCT.',O:'#{tooth} tender; PARL; fistula. Prior RCT in place.',A:'#{tooth} surgical endodontic treatment.',steps:['LA: {anesthetic} (hemostasis)','Full-thickness flap; osteotomy','Root-end resection ~{resection}mm','Lesion curetted (specimen → pathology)','Root-end prep (ultrasonic); {retrofill} retrofill','Flap repositioned, {suture} suture','Post-op Rx {rx}'],outcome:'Apicoectomy complete. Retrofill verified.',next:'Suture removal 5–7d; 6-mo PA'},{id:'v2',label:'Suture Removal',S:'#{tooth} post-apicoectomy follow-up.',O:'Healing: {healing}.',A:'Post-op review.',steps:['Sutures removed','PA — no widening of PARL'],outcome:'Healing satisfactory.',next:'6-month PA for resolution'}]}}},surgical:{label:'Oral Surgery & Implant',items:{extraction:{name:'Extraction',tag:'SURG',visits:[{id:'v1',label:'Simple Extraction',S:'Px for #{tooth} extraction. Consent obtained.',O:'#{tooth} non-restorable. No acute infection.',A:'#{tooth} simple extraction.',steps:['Medical Hx: ASA {asa}','LA: {anesthetic} {dose} ({technique})','Luxation + forceps extraction','#{tooth} extracted intact','Socket irrigated; curetted','Gauze pressure 5 min','Post-op instructions; Rx {rx}'],outcome:'#{tooth} extracted. Socket hemostatic.',next:'Review 1 wk PRN'},{id:'v2',label:'Surgical Extraction',S:'Px for #{tooth} surgical extraction. Consent obtained.',O:'#{tooth} impacted/retained root.',A:'#{tooth} surgical extraction.',steps:['LA: {anesthetic} {dose}','Full-thickness flap','Ostectomy / sectioning','#{tooth}/root(s) removed; socket curetted','Primary closure, {suture} suture','Post-op Rx {rx}'],outcome:'#{tooth} surgically extracted. Primary closure.',next:'Suture removal 7–14d'}]},implant_surg:{name:'Implant Surgery',tag:'IMPLANT',visits:[{id:'v1',label:'V1 — Fixture Placement',S:'Px for #{tooth} implant. Consent obtained.',O:'CBCT: ridge width {width}mm, height {height}mm.',A:'#{tooth} implant placement.',steps:['Medical Hx: ASA {asa}','LA: {anesthetic} {dose}','Crestal incision; flap reflected','Sequential drilling; irrigation','Fixture: {brand} {fixSize}; torque {torque}Ncm','ISQ {isq} — osseointegration predicted','{coverType} placed; primary closure, {suture} suture','Post-op Rx {rx}'],outcome:'Fixture placed. Torque {torque}Ncm. ISQ {isq}.',next:'Suture removal 10–14d; 2nd stage {stage}'},{id:'v2',label:'V2 — Suture Removal',S:'#{tooth} implant — 10–14d post-op.',O:'Healing abutment intact. Tissue: {tissue}.',A:'Post-implant review.',steps:['Sutures removed','PA — no peri-implant pathology'],outcome:'Uncomplicated healing.',next:'2nd stage at {stage}'},{id:'v3',label:'V3 — 2nd Stage',S:'#{tooth} implant {months} mo post-op. 2nd stage.',O:'Clinically osseointegrated.',A:'2nd stage — uncovering.',steps:['Tissue punch / mini-flap','Cover screw removed; healing abutment placed','Tissue adapted'],outcome:'2nd stage complete.',next:'Impression 2–4 wks'},{id:'v4',label:'V4 — Impression',S:'#{tooth} soft tissue matured. Impression.',O:'Peri-implant tissue healthy.',A:'Implant impression.',steps:['Healing abutment removed','Impression coping placed; PA verified (no gap)','PVS impression / digital scan; shade {shade}','Healing abutment replaced'],outcome:'Implant impression taken.',next:'Crown delivery {recall}'},{id:'v5',label:'V5 — Crown Delivery',S:'#{tooth} implant crown delivery.',O:'Custom abutment + crown from lab.',A:'#{tooth} implant crown delivery.',steps:['Healing abutment removed','Custom abutment torqued {torque}Ncm','PA verified','Crown {retention}; occlusion adjusted','Post-op & maintenance explained'],outcome:'#{tooth} implant crown delivered.',next:'Recall {recall}; peri-implant maintenance'}]},sinus:{name:'Sinus Surgery',tag:'IMPLANT',visits:[{id:'v1',label:'Sinus Augmentation',S:'Px for sinus augmentation. CBCT reviewed.',O:'Residual height {height}mm. Membrane intact.',A:'{approach} sinus lift.',steps:['Pre-op antibiotic; LA: {anesthetic} {dose}','Crestal incision; flap; {approach} approach','Membrane elevated — integrity confirmed','Sinus floor: {graft} {amount}cc','Collagen membrane; {simultaneous}','Primary closure, {suture} suture','Post-op: no nose-blowing; Rx {rx}'],outcome:'Sinus graft placed. Membrane intact.',next:'Suture removal 10–14d; re-eval {reeval}'},{id:'v2',label:'Follow-up',S:'Sinus graft {months} mo post-op.',O:'No sinusitis. Tissue: {tissue}.',A:'Sinus graft healing.',steps:['Clinical + PA/CBCT review','No signs of infection or graft failure'],outcome:'Graft healing well.',next:'Implant at {reeval}'}]},bone_graft:{name:'Bone Graft / Socket Preservation',tag:'GRAFT',visits:[{id:'v1',label:'Grafting',S:'Px for #{tooth} socket preservation. Consent obtained.',O:'#{tooth} — {wallDesc} socket. Buccal plate: {buccal}.',A:'Socket preservation.',steps:['LA: {anesthetic} {dose}','Atraumatic extraction (if indicated)','Socket degranulated; irrigated','Graft: {graft} to bone level','Collagen membrane/plug; {suture} suture','Post-op Rx {rx}'],outcome:'Graft placed.',next:'Suture removal 10–14d; re-eval {reeval}'},{id:'v2',label:'Follow-up',S:'Post-graft follow-up #{tooth}.',O:'Tissue: {tissue}.',A:'Graft healing.',steps:['Sutures removed','PA — graft assessed'],outcome:'Healing satisfactory.',next:'Implant at {reeval}'}]},gbr:{name:'GBR',tag:'GRAFT',visits:[{id:'v1',label:'GBR Procedure',S:'Px for #{tooth} GBR. Consent obtained.',O:'#{tooth} — {defect}. CBCT: {boneDesc}.',A:'#{tooth} GBR ({timing}).',steps:['LA: {anesthetic} {dose}','Crestal incision; flap; vertical releasing incisions','{implantStep}','Defect {defectSize}mm; decortication','Graft: {graft}; {membrane}','Tacks: {tacks}','Periosteal release; tension-free closure, {suture} suture','Post-op: antibiotic, CHX'],outcome:'GBR complete. Membrane secured.',next:'Suture removal 10–14d; re-eval {reeval}'},{id:'v2',label:'Membrane Removal',S:'#{tooth} membrane removal.',O:'Tissue: {tissue}. Membrane: {membraneStatus}.',A:'Membrane removal.',steps:['LA infiltration','Incision; membrane removed intact','New bone assessed','Primary closure, {suture} suture'],outcome:'Membrane removed. New bone present.',next:'Implant at {reeval}'}]}}},perio:{label:'Periodontics',items:{srp:{name:'SRP',tag:'PERIO',visits:[{id:'v1',label:'UR / UL SRP',S:'Px for SRP. Consent obtained.',O:'PD {pd}mm; BOP+; calculus. Bone loss {boneloss}%.',A:'{stage} periodontitis — active SRP.',steps:['LA: {anesthetic} {dose} (UR+UL)','Ultrasonic scaling','Gracey curette root planing — UR and UL','Irrigation; OHI'],outcome:'UR/UL SRP completed.',next:'LR/LL next visit'},{id:'v2',label:'LR / LL SRP',S:'Px returns for lower SRP.',O:'UR/UL: tissue improving.',A:'Lower quadrant SRP.',steps:['LA: {anesthetic} {dose} (LR+LL)','Ultrasonic + Gracey curette — LR and LL','Irrigation; OHI reinforced'],outcome:'Full-mouth SRP complete.',next:'6-week re-eval'},{id:'v3',label:'6-wk Re-evaluation',S:'SRP re-eval at 6 weeks.',O:'Re-charting: PD {pd}mm; BOP {bop}%; plaque {plaque}%.',A:'Post-SRP response: {response}.',steps:['Full perio re-charting','Response assessed','OHI reinforced'],outcome:'Re-eval complete: {response}.',next:'SPT {interval} / surgical consult PRN'}]},perio_maint:{name:'Periodontal Maintenance',tag:'PERIO',visits:[{id:'v1',label:'SPT Visit',S:'Px for SPT ({interval} interval). No acute complaints.',O:'BOP {bop}%; PD {pd}mm at {sites}; plaque {plaque}%. Stable.',A:'{stage} periodontitis — stable on maintenance.',steps:['Full-mouth re-charting; vs baseline','Supra/subgingival debridement','Localized subgingival scaling: {sites}','Polish; fluoride; OHI'],outcome:'SPT completed. Stable.',next:'SPT recall {interval}'}]},gtr:{name:'GTR',tag:'PERIO-SURG',visits:[{id:'v1',label:'GTR Surgery',S:'Px for #{tooth} GTR. Consent obtained.',O:'#{tooth} — {wall} intrabony defect, PD {pd}mm.',A:'#{tooth} GTR.',steps:['LA: {anesthetic} {dose}','Intrasulcular incision; full-thickness flap (papilla preservation)','Thorough degranulation; root planing; EDTA conditioning','Bone graft ({graft}) into defect','{membrane} placed','Biologics: {biologic}','Tension-free closure, {suture} suture','Post-op: CHX, antibiotic'],outcome:'GTR complete.',next:'Suture removal 10–14d; re-eval 3–6 mo'},{id:'v2',label:'GTR Re-evaluation',S:'#{tooth} GTR re-eval.',O:'PD {pd}mm (was {prevPD}mm). BOP: {bop}. Tissue: {tissue}.',A:'#{tooth} GTR outcome.',steps:['Probing charted and compared','Radiographic bone fill assessed'],outcome:'GTR response: {response}.',next:'SPT {interval}'}]},crown_length:{name:'Crown Lengthening',tag:'PERIO-SURG',visits:[{id:'v1',label:'Surgery',S:'Px for #{tooth} crown lengthening. Consent obtained.',O:'#{tooth} — {finding}. Bone sounding {boneSound}mm.',A:'#{tooth} {clType} crown lengthening.',steps:['LA: {anesthetic} {dose}','Incision; full-thickness flap','Ostectomy/osteoplasty — {bw}mm biologic width','Flap {flapPos} positioned, {suture} suture'],outcome:'{bw}mm sound structure exposed.',next:'Suture removal 7–14d; heal {heal}'}]},ctg:{name:'CTG',tag:'SOFT-TISSUE',visits:[{id:'v1',label:'CTG Surgery',S:'Px for #{tooth} CTG. Consent obtained.',O:'#{tooth} — {recClass} recession {recAmount}mm.',A:'#{tooth} CTG root coverage.',steps:['LA: recipient + palate','Recipient: {recipientDesign}; EDTA conditioning','CTG harvested from palate','Graft positioned; {suture} suture','Coronally advanced flap; sling suture','Palatal stent; Post-op Rx {rx}'],outcome:'CTG placed.',next:'Suture removal 10–14d; re-eval 3 mo'},{id:'v2',label:'CTG Re-evaluation',S:'#{tooth} CTG 3-month follow-up.',O:'Root coverage {coverage}%. KT gain {ktGain}mm.',A:'#{tooth} CTG outcome.',steps:['Clinical measurements documented','Root coverage and KT gain assessed'],outcome:'{coverage}% root coverage achieved.',next:'Recall {recall}'}]},fgg:{name:'FGG',tag:'SOFT-TISSUE',visits:[{id:'v1',label:'FGG Surgery',S:'Px for #{tooth} FGG. Consent obtained.',O:'#{tooth} — inadequate KT <{kt}mm.',A:'#{tooth} FGG.',steps:['LA: recipient + palate','Recipient bed: partial-thickness apical to MGJ','FGG harvested from palate','Graft sutured ({suture})','Palatal stent placed'],outcome:'FGG placed.',next:'Suture removal 10–14d; KT assessment 3 mo'}]},frenectomy:{name:'Frenectomy',tag:'SOFT-TISSUE',visits:[{id:'v1',label:'Frenectomy',S:'Px for {frenum} frenectomy.',O:'Prominent {frenum} frenum — blanching on traction.',A:'Frenectomy indicated.',steps:['LA infiltration','Frenum excised ({method})','Fibers released to periosteum','{closure}','Post-op instructions'],outcome:'Frenectomy completed.',next:'1–2 wk healing check'}]}}},general:{label:'General & Other',items:{checkup:{name:'Regular Checkup',tag:'EXAM',visits:[{id:'v1',label:'Recall Exam',S:'Px for routine recall. No acute complaints.',O:'{xray} — no new caries. Perio stable PD ≤3mm BOP <20%. Restorations intact.',A:'Healthy dentition.',steps:['Clinical exam; radiographs reviewed','Prophylaxis (ultrasonic + hand)','Fluoride varnish','OHI: {ohi}','Caries risk: {cariesRisk}'],outcome:'Recall completed. No pathology.',next:'Recall {recall}'}]},ortho:{name:'Orthodontics',tag:'ORTHO',visits:[{id:'v1',label:'Bonding',S:'Px for bracket bonding. Consent signed.',O:'{classification}; crowding {crowding}mm; OJ {oj}mm; OB {ob}%.',A:'{classification} — fixed appliance initiated.',steps:['Clean; etch; bond','Brackets bonded: {teeth}','{archwire} archwire; ligated','OHI: brushing, diet restrictions'],outcome:'Brackets bonded.',next:'4–6 wk adjustment'},{id:'v2',label:'Adjustment',S:'Px for adjustment.',O:'Alignment improving. OJ {oj}mm.',A:'Treatment progressing.',steps:['Archwire: {archwire}','Elastics: {elastics}','OHI reinforced'],outcome:'Adjustment completed.',next:'4–6 wk recall'},{id:'v3',label:'Debond',S:'Px for debond — objectives met.',O:'OJ {oj}mm, OB {ob}%.',A:'Ortho treatment complete.',steps:['Brackets removed; adhesive polished','Final records taken','Retainers: {retainer}','Retention instructions'],outcome:'Debond complete. Retainers delivered.',next:'Retention recall 6 mo'}]},tmd:{name:'TMD / Occlusal Splint',tag:'TMD',visits:[{id:'v1',label:'Consultation',S:'Px c/o jaw pain, headaches, clenching. Pain {pain}/10.',O:'MIO {mio}mm; {deviation}; {tmjFinding}; masseter tenderness.',A:'Myofascial pain + bruxism.',steps:['Impressions for {splintType} splint','Occlusal records','Education: soft diet, jaw rest'],outcome:'Records taken. Splint in fabrication.',next:'Splint delivery'},{id:'v2',label:'Splint Delivery',S:'Px for splint delivery.',O:'Splint from lab.',A:'{splintType} delivery.',steps:['Splint inserted; adjusted to even bilateral contacts in CR','Canine guidance verified','Wear instructions: nights initially'],outcome:'Splint delivered and adjusted.',next:'1–2 wk check'},{id:'v3',label:'Follow-up',S:'Splint follow-up. Symptoms: {symptom}. Pain {pain}/10.',O:'MIO {mio}mm.',A:'TMD follow-up.',steps:['Splint adjusted: {adjustments}','Symptoms reassessed','Escalation PRN'],outcome:'Follow-up done. Symptoms {response}.',next:'4–6 wk recall'}]}}}};
+
+const VN_OPTIONS=Object.assign({},ACTIVE_OPTIONS,{complaint:['sensitivity','pain','swelling','no complaints','cosmetic concern'],pa:['WNL — no PARL','PARL at apex','widened PDL','normal'],vitality:['vital — WNL','vital — hyperreactive','non-vital — no response'],diagnosis:['reversible pulpitis','irreversible pulpitis','necrotic pulp','normal','recurrent caries'],pain:['0','1','2','3','4','5','6','7','8','9','10'],ohi:['brushing 2×/day; floss daily','interdental brush; mouthwash','needs reinforcement'],cariesRisk:['low','moderate','high'],response:['improved — stable','partial improvement','no improvement — refer'],plaque:['<20','20–40','40–60'],prevPD:['5','6','7','8'],coverage:['100','80','60'],ktGain:['1','2','3'],boneSound:['2','3','4'],asa:['I','II','III'],isq:['70','72','75','68'],tissue:['healthy','mild hyperplasia','BOP+','granulation tissue'],membraneStatus:['intact','partial exposure','exposed'],tacks:['2 titanium tacks','no fixation needed'],buccal:['intact','compromised','absent'],elastics:['Class II 3.5oz','Class III 3.5oz','box elastics','none this visit'],healing:['excellent — uneventful','satisfactory','delayed'],flap:['submarginal','sulcular'],newRec:['0','0.5','1'],adjustments:['bilateral contacts refined','anterior stop added'],});
+
+let currentMode='initial';let activeVnKey=null;let activeVnVisit=null;
+function switchMode(mode){
+  currentMode=mode;
+  document.getElementById('modeInitial').classList.toggle('active',mode==='initial');
+  document.getElementById('modeVisit').classList.toggle('active',mode==='visit');
+  document.getElementById('initialSidebarPanel').style.display=mode==='initial'?'':'none';
+  const vsp=document.getElementById('visitSidebarPanel');
+  vsp.style.display=mode==='visit'?'flex':'none';
+  if(mode==='visit'){
+    vsp.style.flexDirection='column';vsp.style.flex='1';vsp.style.overflowY='auto';
+    buildVnSidebar('');
+    document.getElementById('topTitle').childNodes[0].nodeValue='Visit Notes';
+    document.getElementById('topSub').textContent='';
+    ['resetBtn','previewBtn','copyBtn'].forEach(id=>document.getElementById(id).style.display='none');
+    document.getElementById('fieldCount').style.display='none';
+    workspace.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v4M16 2v4M3 10h18M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z"/><path d="M8 14h.01M12 14h.01M16 14h.01"/></svg><div class="big">Visit Notes</div><div>Select a procedure + visit step from the left.<br>Template auto-fills — edit freely then copy to EMR.</div></div>`;
+  }
+}
+function buildVnSidebar(filter){
+  const list=document.getElementById('vnProcList');list.innerHTML='';
+  const f=(filter||'').toLowerCase();
+  for(const catKey in VN_TEMPLATES){
+    const cat=VN_TEMPLATES[catKey];
+    const matches=Object.entries(cat.items).filter(([k,v])=>v.name.toLowerCase().includes(f)||v.tag.toLowerCase().includes(f));
+    if(!matches.length)continue;
+    const lbl=document.createElement('div');lbl.className='vn-proc-name';lbl.textContent=cat.label;list.appendChild(lbl);
+    matches.forEach(([k,v])=>{
+      const fullKey=catKey+'/'+k;
+      v.visits.forEach((visit,i)=>{
+        const item=document.createElement('div');
+        item.className='vn-visit-item'+(activeVnKey===fullKey&&activeVnVisit===visit.id?' active':'');
+        item.innerHTML=`<span class="vn-visit-num">V${i+1}</span><span style="flex:1"><span style="font-size:13px">${v.name}</span><br><span style="font-size:11px;opacity:.65">${visit.label}</span></span>`;
+        item.onclick=()=>selectVnVisit(catKey,k,visit.id);
+        list.appendChild(item);
+      });
+    });
+  }
+}
+function selectVnVisit(catKey,procKey,visitId){
+  activeVnKey=catKey+'/'+procKey;activeVnVisit=visitId;
+  buildVnSidebar(document.getElementById('vnSearch').value);
+  const proc=VN_TEMPLATES[catKey].items[procKey];
+  const visit=proc.visits.find(v=>v.id===visitId);
+  if(!visit)return;
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('topTitle').childNodes[0].nodeValue=proc.name;
+  document.getElementById('topSub').textContent='· '+visit.label;
+  document.getElementById('copyBtn').style.display='flex';
+  document.getElementById('copyBtn').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy note`;
+  document.getElementById('resetBtn').style.display='flex';
+  document.getElementById('previewBtn').style.display='none';
+  document.getElementById('fieldCount').style.display='none';
+  renderVnCard(proc,visit,today);
+}
+function renderVnCard(proc,visit,dateVal){
+  function vnFldify(text){
+    return(text||'').replace(/\{([^}]+)\}/g,(m,ph)=>{
+      return`<span class="vn-fld" data-ph="${ph}" data-val=""><span class="ph">${ph}</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></span>`;
+    });
+  }
+  const stepsHtml=(visit.steps||[]).map((s,i)=>`
+    <div class="vn-step-row" draggable="true" data-si="${i}">
+      <span class="vn-step-drag">⠿</span><span class="vn-step-bullet">–</span>
+      <textarea class="vn-step-ta" data-si="${i}" rows="1" spellcheck="false">${esc(s)}</textarea>
+      <span class="vn-step-del" data-si="${i}">&times;</span>
+    </div>`).join('');
+  workspace.innerHTML=`
+    <div class="vn-card">
+      <div class="vn-card-head">
+        <div class="vn-card-head-left">
+          <div class="vn-proc-label">${esc(proc.tag)} · ${esc(proc.name)}</div>
+          <div class="vn-visit-title">${esc(visit.label)}</div>
+          <div class="vn-date-row"><span class="vn-date-label">Date:</span><input class="vn-date-input" id="vnDateInput" type="date" value="${dateVal}"></div>
+        </div>
+        <span class="vn-tag">${esc(proc.tag)}</span>
+      </div>
+      <div class="vn-section">
+        <div class="vn-section-head"><div class="vn-section-letter">S</div><div class="vn-section-label">Subjective</div></div>
+        <textarea class="vn-textarea" id="vnS" rows="2" spellcheck="false">${esc(visit.S||'')}</textarea>
+      </div>
+      <div class="vn-section">
+        <div class="vn-section-head"><div class="vn-section-letter">O</div><div class="vn-section-label">Objective</div></div>
+        <textarea class="vn-textarea" id="vnO" rows="2" spellcheck="false">${esc(visit.O||'')}</textarea>
+      </div>
+      <div class="vn-section">
+        <div class="vn-section-head"><div class="vn-section-letter">A</div><div class="vn-section-label">Assessment</div></div>
+        <textarea class="vn-textarea" id="vnA" rows="1" spellcheck="false">${esc(visit.A||'')}</textarea>
+      </div>
+      <div class="vn-section">
+        <div class="vn-section-head"><div class="vn-section-letter">P</div><div class="vn-section-label">Procedure Steps</div></div>
+        <div class="vn-step-list" id="vnStepList">${stepsHtml}</div>
+        <span class="vn-add-step" id="vnAddStep">+ Add step</span>
+      </div>
+      <div class="vn-section">
+        <div class="vn-section-head"><div class="vn-section-letter">✓</div><div class="vn-section-label">Outcome & Next Visit</div></div>
+        <div class="vn-outcome-grid">
+          <div><div class="vn-outcome-label">Outcome</div><textarea class="vn-textarea" id="vnOutcome" rows="2" spellcheck="false">${esc(visit.outcome||'')}</textarea></div>
+          <div><div class="vn-outcome-label">Next appointment</div><textarea class="vn-textarea" id="vnNext" rows="2" spellcheck="false">${esc(visit.next||'')}</textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="hint">All fields freely editable · drag steps to reorder · Tab between fields</div>`;
+  workspace.querySelectorAll('.vn-textarea,.vn-step-ta').forEach(ta=>{vnAutoResize(ta);ta.addEventListener('input',()=>vnAutoResize(ta));});
+  attachVnStepListeners(proc,visit,dateVal);
+  document.getElementById('vnAddStep').onclick=()=>{
+    const steps=getVnSteps();steps.push('');
+    renderVnCard(proc,{...visit,steps},document.getElementById('vnDateInput').value);
+    setTimeout(()=>{const rows=document.querySelectorAll('.vn-step-ta');if(rows.length)rows[rows.length-1].focus();},30);
+  };
+  // vn-fld dropdowns
+  workspace.querySelectorAll('.vn-fld').forEach(f=>{
+    f.addEventListener('click',(e)=>{e.stopPropagation();openVnFieldDropdown(f);});
+  });
+}
+function vnAutoResize(ta){ta.style.height='auto';ta.style.height=Math.max(ta.scrollHeight,40)+'px';}
+function getVnSteps(){return[...document.querySelectorAll('.vn-step-ta')].map(t=>t.value);}
+function attachVnStepListeners(proc,visit,dateVal){
+  let dragSi=null;const list=document.getElementById('vnStepList');if(!list)return;
+  list.querySelectorAll('.vn-step-row').forEach(row=>{
+    row.ondragstart=(e)=>{dragSi=+row.dataset.si;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
+    row.ondragend=()=>list.querySelectorAll('.vn-step-row').forEach(r=>r.classList.remove('dragging','drag-over'));
+    row.ondragover=(e)=>{e.preventDefault();row.classList.add('drag-over');};
+    row.ondragleave=()=>row.classList.remove('drag-over');
+    row.ondrop=(e)=>{e.preventDefault();const di=+row.dataset.si;if(dragSi===null||dragSi===di)return;const steps=getVnSteps();const mv=steps.splice(dragSi,1)[0];steps.splice(di,0,mv);dragSi=null;renderVnCard(proc,{...visit,steps},document.getElementById('vnDateInput').value);};
+    row.querySelector('.vn-step-del').onclick=()=>{const steps=getVnSteps();steps.splice(+row.dataset.si,1);renderVnCard(proc,{...visit,steps},document.getElementById('vnDateInput').value);};
+  });
+}
+function openVnFieldDropdown(fld){
+  if(openDropdown&&openDropdown._fld===fld){closeDropdown();return;}
+  closeDropdown();fld.classList.add('open');
+  const ph=fld.dataset.ph,opts=[...(VN_OPTIONS[ph]||ACTIVE_OPTIONS[ph]||[])];
+  const dd=document.createElement('div');dd.className='dropdown';dd._fld=fld;
+  const optHtml=opts.map(o=>`<div class="dd-opt">${esc(o)}</div>`).join('')||`<div class="dd-opt" style="font-style:italic;color:#a8a99c;cursor:default">Type below</div>`;
+  dd.innerHTML=`<div class="dd-head">${ph}</div><div class="dd-opts">${optHtml}</div><div class="dd-custom"><input type="text" placeholder="Custom…" value="${esc(fld.dataset.val||'')}"><button>Set</button></div>`;
+  document.body.appendChild(dd);positionDD(dd,fld);openDropdown=dd;
+  const setVal=(val)=>{fld.dataset.val=val;fld.classList.add('filled');fld.innerHTML=`${esc(val)}<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>`;fld.addEventListener('click',(e)=>{e.stopPropagation();openVnFieldDropdown(fld);});closeDropdown();};
+  dd.querySelectorAll('.dd-opt').forEach(o=>{if(o.style.cursor==='default')return;o.onclick=()=>setVal(o.textContent);});
+  const inp=dd.querySelector('input'),btn=dd.querySelector('button');
+  btn.onclick=()=>{const v=inp.value.trim();if(v)setVal(v);else closeDropdown();};
+  inp.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();const v=inp.value.trim();if(v)setVal(v);else closeDropdown();}if(e.key==='Escape')closeDropdown();};
+  setTimeout(()=>{if(opts.length)dd.focus();else inp.focus();},10);
+}
+function getVnPlainText(){
+  if(currentMode!=='visit'||!activeVnKey)return'';
+  const catKey=activeVnKey.split('/')[0],procKey=activeVnKey.split('/')[1];
+  const proc=VN_TEMPLATES[catKey].items[procKey];
+  const visit=proc.visits.find(v=>v.id===activeVnVisit);
+  const date=document.getElementById('vnDateInput')?.value||new Date().toISOString().split('T')[0];
+  const S=document.getElementById('vnS')?.value||'';
+  const O=document.getElementById('vnO')?.value||'';
+  const A=document.getElementById('vnA')?.value||'';
+  const steps=getVnSteps();
+  const outcome=document.getElementById('vnOutcome')?.value||'';
+  const next=document.getElementById('vnNext')?.value||'';
+  const title=`${proc.name} — ${visit.label}`;
+  return`${title}\n${'='.repeat(title.length)}\nDate: ${date}\n\nS: ${S}\n\nO: ${O}\n\nA: ${A}\n\nP:\n${steps.filter(s=>s.trim()).map(s=>`  - ${s}`).join('\n')}\n\nOutcome: ${outcome}\nNext: ${next}`.trim();
+}
+
+// copy + reset override for visit mode
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  if(currentMode==='visit'){navigator.clipboard.writeText(getVnPlainText()).then(()=>showToast('Visit note copied'));}
+  else{navigator.clipboard.writeText(getPlainChart()).then(()=>showToast('Chart copied'));}
+},{capture:true});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(currentMode==='visit'&&activeVnKey){
+    const [catKey,procKey]=activeVnKey.split('/');
+    const proc=VN_TEMPLATES[catKey].items[procKey];
+    const visit=proc.visits.find(v=>v.id===activeVnVisit);
+    renderVnCard(proc,visit,new Date().toISOString().split('T')[0]);
+    showToast('Visit note reset');
+  }
+},{capture:true});
+document.getElementById('vnSearch').addEventListener('input',e=>buildVnSidebar(e.target.value));
+
+// mobile visit panel
+function buildMobVnSidebar(filter){
+  const list=document.getElementById('mobVnProcList');if(!list)return;
+  list.innerHTML='';const f=(filter||'').toLowerCase();
+  for(const catKey in VN_TEMPLATES){
+    const cat=VN_TEMPLATES[catKey];
+    const matches=Object.entries(cat.items).filter(([k,v])=>v.name.toLowerCase().includes(f)||v.tag.toLowerCase().includes(f));
+    if(!matches.length)continue;
+    const lbl=document.createElement('div');lbl.className='cat-label';lbl.textContent=cat.label;list.appendChild(lbl);
+    matches.forEach(([k,v])=>{
+      v.visits.forEach((visit,i)=>{
+        const item=document.createElement('div');item.className='proc-item';
+        item.innerHTML=`<span>${v.name} — ${visit.label}</span><span class="tag">V${i+1}</span>`;
+        item.onclick=()=>{switchMode('visit');selectVnVisit(catKey,k,visit.id);mobShowPanel('chart');};
+        list.appendChild(item);
+      });
+    });
+  }
+}
+document.getElementById('mobVnSearch')?.addEventListener('input',e=>buildMobVnSidebar(e.target.value));
+buildMobVnSidebar('');
+
+buildSidebar();
+// also build on resize (e.g. orientation change)
+window.addEventListener('resize', ()=>{ if(isMobile()) buildMobSidebar(); });
+} catch(e) {
+  console.error('ChartRx init error:', e);
+  const ws=document.getElementById('workspace');
+  if(ws) ws.innerHTML='<div style="padding:40px;text-align:center;color:#b4452f;font-family:sans-serif"><div style="font-size:18px;margin-bottom:8px">⚠️ Load error</div><div style="font-size:12px;opacity:.7">'+e.message+'</div></div>';
+}
+</script>
+<!-- PWA: Update banner -->
+<div id="updateBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:#0f5c4a;color:#fff;padding:12px 18px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;display:none;align-items:center;justify-content:space-between;gap:12px">
+  <span>🔄 New version available</span>
+  <div style="display:flex;gap:8px">
+    <button onclick="applyUpdate()" style="padding:6px 14px;border:none;border-radius:6px;background:#fff;color:#0f5c4a;font-weight:700;cursor:pointer;font-size:12px">Update now</button>
+    <button onclick="document.getElementById('updateBanner').style.display='none'" style="padding:6px 10px;border:1px solid rgba(255,255,255,.4);border-radius:6px;background:transparent;color:#fff;cursor:pointer;font-size:12px">Later</button>
+  </div>
+</div>
+
+<script>
+/* ===== SERVICE WORKER — fully isolated, never blocks the app ===== */
+(function(){
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    let _newWorker = null;
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+          reg.addEventListener('updatefound', () => {
+            _newWorker = reg.installing;
+            if (!_newWorker) return;
+            _newWorker.addEventListener('statechange', () => {
+              try {
+                if (_newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  const b = document.getElementById('updateBanner');
+                  if (b) b.style.display = 'flex';
+                }
+              } catch(e) {}
+            });
+          });
+        })
+        .catch(() => {}); // silently ignore — works fine without SW
+      try {
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
+      } catch(e) {}
+    });
+    window.applyUpdate = function() {
+      try { if (_newWorker) _newWorker.postMessage('skipWaiting'); } catch(e) {}
+    };
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
