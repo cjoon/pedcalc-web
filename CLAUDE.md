@@ -4,7 +4,7 @@ Read `.harness/AGENT.md` and follow the shared contract.
 Your role is **Coder**. Apply the Coder contract in that file.
 If AGENTS.md is also in your context, its role line addresses a different tool; ignore it.
 
-# pedcalc-med — Pediatric Dosage Calculator + ChartRx (web)
+# dentaldoc — Pediatric Dosage + Charting (+ Supply)
 
 ## Overview
 Weight-based pediatric drug dosage calculator, merged with a SOAP

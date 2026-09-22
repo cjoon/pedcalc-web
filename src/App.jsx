@@ -36,7 +36,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <span className="topbar-brand">ChartRx</span>
+        <span className="topbar-brand">DentalDoc</span>
         <nav className="topbar-tabs">
           {TABS.map((tab) => (
             <button

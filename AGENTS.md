@@ -5,7 +5,7 @@ Your role is **Reviewer**. Apply the Reviewer contract in that file.
 If CLAUDE.md is also in your context, its role line addresses a different tool; ignore it.
 If you can write files, you were launched wrong: stop and say so.
 
-# pedcalc-med — Pediatric Dosage Calculator + ChartRx (web)
+# dentaldoc — Pediatric Dosage + Charting (+ Supply)
 
 ## Overview
 Weight-based pediatric drug dosage calculator, merged with a SOAP

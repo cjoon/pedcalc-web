@@ -1,7 +1,7 @@
 # Project
 
 ## Identity
-Name: pedmed-web
+Name: dentaldoc
 Purpose: Pediatric dental clinical reference web app: weight-based dosage calculator (AAPD 2025-2026)
 plus SOAP charting templates (Initial Chart / Visit Note), deployed to GitHub Pages
 (cjoon.github.io/pedcalc-web). Next feature: a dental supply order form tab.

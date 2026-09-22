@@ -2,20 +2,20 @@
 Status: DONE
 
 ## Goal
-Record CJ's branch rule in the Deploy section of CLAUDE.md and AGENTS.md
+Rename the project to dentaldoc: app display name, package name, doc titles (GitHub repo and Pages URL unchanged)
 Plan: none
 
 ## Scope
-Allowed: CLAUDE.md, AGENTS.md (Deploy section only), .harness/STATE.md
-Off-limits: src/, scripts/, reference/, .github/workflows/
+Allowed: src/App.jsx (brand text only), index.html (title only), package.json, package-lock.json (name only), CLAUDE.md, AGENTS.md (title only), .harness/PROJECT.md, .harness/STATE.md
+Off-limits: vite.config.js base, .github/workflows/, PLAN.md and DECISIONS.md history, .harness/plan.md
 
 ## Done when
-- [x] Deploy section in both files names the dosage/chart/supply branches and says a push request is the approval to merge into main
-- [x] CLAUDE.md and AGENTS.md bodies below the loader stay identical
-- [x] harness check exits 0
+- [x] Topbar brand and page title read "DentalDoc"
+- [x] package name is dentaldoc; CLAUDE.md/AGENTS.md titles updated, bodies still identical
+- [x] validation passes
 
 ## Validate
-harness check && diff <(tail -n +8 CLAUDE.md) <(tail -n +9 AGENTS.md)
+npm run lint && npm run build && node scripts/check-data-parity.mjs && harness check
 
 ## Context
-CJ set the rule 2026-09-22. Next task (Visit Note O-line vocabulary) is STATE.md Next #1.
+CJ chose the name 2026-09-22. The local folder moves to ~/projects/dentaldoc after the push.
