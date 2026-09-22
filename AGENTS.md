@@ -125,3 +125,6 @@ Pages: cjoon.github.io/pedcalc-web. See PLAN.md for the integration roadmap.
 ## Deploy
 - GitHub Actions → GitHub Pages, auto-deploys on push to main.
   Never merge to main without CJ's approval.
+- Branch per area: work on `dosage`, `chart` or `supply` (create from main if
+  missing). CJ asking to push is the approval: merge that branch into main,
+  run lint/build/parity/`harness check` on main, push main, confirm the deploy.

@@ -1,13 +1,13 @@
 # State
-Updated: 2026-09-22 · commit 9f82b84
+Updated: 2026-09-22 · commit 29cd7af
 
 ## Milestone
 Visit Note O-line vocabulary (not started) — done when 4 new groups are wired in and parity exits 0
 
 ## In progress
 - Done: ChartRx MVP + Visit Note (v1.1) deployed; Visit Note A-line vocabulary complete. O-line not started
-- Harness adopted on branch consolidate-projects (root STATE.md moved here)
-- Deployed main = 63a4780; chart-followups adds 62a7023 + d28910c, not yet merged
+- Harness adopted; everything merged and deployed (main = 29cd7af, deploy success)
+- Branch rule from now on: dosage / chart / supply branches, push = merge into main (CLAUDE.md Deploy)
 
 ## Next
 1. Visit Note O-line vocabulary — new groups healingFindings, provisionalFindings, endoInterimFindings, implantFollowupFindings (49 lines left)

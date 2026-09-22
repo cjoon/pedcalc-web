@@ -2,21 +2,20 @@
 Status: DONE
 
 ## Goal
-Adopt the harness: generate .harness/, link the existing CLAUDE.md/AGENTS.md as loaders, move root STATE.md into .harness/STATE.md
+Record CJ's branch rule in the Deploy section of CLAUDE.md and AGENTS.md
 Plan: none
 
 ## Scope
-Allowed: .harness/, CLAUDE.md, AGENTS.md, STATE.md (root, deleted)
+Allowed: CLAUDE.md, AGENTS.md (Deploy section only), .harness/STATE.md
 Off-limits: src/, scripts/, reference/, .github/workflows/
 
 ## Done when
-- [x] CLAUDE.md names Claude as Coder, AGENTS.md names Codex as Reviewer; project rules below the loader unchanged
-- [x] root STATE.md content carried into .harness/STATE.md and the root file removed
+- [x] Deploy section in both files names the dosage/chart/supply branches and says a push request is the approval to merge into main
+- [x] CLAUDE.md and AGENTS.md bodies below the loader stay identical
 - [x] harness check exits 0
-- [x] validation passes
 
 ## Validate
-harness check && npm run lint && npm run build && node scripts/check-data-parity.mjs
+harness check && diff <(tail -n +8 CLAUDE.md) <(tail -n +9 AGENTS.md)
 
 ## Context
-Next task (Visit Note O-line vocabulary) is STATE.md Next #1; open it here when it starts.
+CJ set the rule 2026-09-22. Next task (Visit Note O-line vocabulary) is STATE.md Next #1.
