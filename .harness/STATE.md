@@ -1,12 +1,12 @@
 # State
-Updated: 2026-09-22 · commit e2cdcfb
+Updated: 2026-09-22 · commit c257dd2
 
 ## Milestone
 Visit Note O-line vocabulary (not started) — done when 4 new groups are wired in and parity exits 0
 
 ## In progress
 - Done: ChartRx MVP + Visit Note (v1.1) deployed; Visit Note A-line vocabulary complete. O-line not started
-- Harness adopted; everything merged and deployed (main = 29cd7af, deploy success)
+- Harness adopted; everything merged and deployed (main = c257dd2, rename commit)
 - Branch rule from now on: dosage / chart / supply branches, push = merge into main (CLAUDE.md Deploy)
 - Renamed to dentaldoc: app shows "DentalDoc", package name dentaldoc, local folder ~/projects/dentaldoc. GitHub repo and Pages URL stay pedcalc-web
 
