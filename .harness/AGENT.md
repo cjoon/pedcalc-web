@@ -30,9 +30,11 @@ Grep `DECISIONS.md` when a design choice is in question; check `Status:` before 
 - First session: fill every `[FIRST SESSION]` placeholder before the first
   task. Read the repository for the answer; ask the user for what it cannot
   tell you; never infer. If `plan.lock` says the plan was not consumed, read
-  `.harness/plan.md` yourself and fill from it.
+  `.harness/plan.md` yourself and fill from it. Once, after init: plan.md
+  `## Decisions` → DECISIONS.md, `## Modules` → modules/<name>.md, and
+  `## Open questions` plus unresolved `## Findings` → STATE.md Known issues.
 - Append to `DECISIONS.md` only for: schema, API contract, state ownership,
-  dependency choice, architecture boundary, security.
+  dependency choice, architecture boundary, security, and the plan move above.
 - A trap hit twice becomes a test, not another note.
 - Mark `TASK.md` Status DONE when the acceptance criteria are met.
 - Fix only what the review names. Leave unrelated work untouched.
