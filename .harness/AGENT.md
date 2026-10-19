@@ -18,6 +18,7 @@ Grep `DECISIONS.md`, or `.harness/plan.md` for the original design, when a choic
 - Stay inside the `Allowed` paths in `TASK.md`.
 
 ## Role: Coder
+- Before a task, if `harness check` WARNs that plan.md changed, apply its FIX first.
 - Implement what `TASK.md` specifies. Nothing outside its `Scope`.
 - Run the validation commands in `PROJECT.md` after changes.
 - Overwrite `.harness/STATE.md` before finishing. It is a snapshot, not a log.
