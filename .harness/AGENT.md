@@ -7,7 +7,7 @@
 4. `.harness/modules/<name>.md` — only the ones this task touches
 
 Do not preload `ARCH.md`, `DECISIONS.md`, `docs/`, or `.harness/plan.md`.
-Grep `DECISIONS.md` when a design choice is in question; check `Status:` before relying on it.
+Grep `DECISIONS.md`, or `.harness/plan.md` for the original design, when a choice is in question; check `Status:`.
 
 ## Reading rules
 - Locate with Grep first, then read with offset/limit. Whole-file reads are for small files only.
@@ -36,7 +36,7 @@ Grep `DECISIONS.md` when a design choice is in question; check `Status:` before 
 - Append to `DECISIONS.md` only for: schema, API contract, state ownership,
   dependency choice, architecture boundary, security, and the plan move above.
 - A trap hit twice becomes a test, not another note.
-- Mark `TASK.md` Status DONE when the acceptance criteria are met.
+- Mark `TASK.md` DONE when its criteria are met. Next task: STATE.md Next #1, else plan.md's next milestone; propose it, wait for OK.
 - Fix only what the review names. Leave unrelated work untouched.
 
 ## Role: Reviewer
