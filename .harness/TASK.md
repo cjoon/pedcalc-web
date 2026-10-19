@@ -2,20 +2,21 @@
 Status: DONE
 
 ## Goal
-Rename the project to dentaldoc: app display name, package name, doc titles (GitHub repo and Pages URL unchanged)
+Move .harness/plan.md `## Modules` into .harness/modules/<name>.md, per the refreshed AGENT.md first-session rule
 Plan: none
 
 ## Scope
-Allowed: src/App.jsx (brand text only), index.html (title only), package.json, package-lock.json (name only), CLAUDE.md, AGENTS.md (title only), .harness/PROJECT.md, .harness/STATE.md
-Off-limits: vite.config.js base, .github/workflows/, PLAN.md and DECISIONS.md history, .harness/plan.md
+Allowed: .harness/modules/, .harness/STATE.md, .harness/TASK.md
+Off-limits: src/, dental-supply/ (another work stream, uncommitted), .harness/plan.md, .harness/DECISIONS.md
 
 ## Done when
-- [x] Topbar brand and page title read "DentalDoc"
-- [x] package name is dentaldoc; CLAUDE.md/AGENTS.md titles updated, bodies still identical
+<!-- each item: a command or an observable result, not an adjective -->
+- [x] .harness/modules/chart-data.md and dosage.md exist, each rule traceable to plan.md `## Modules` and the source it names
+- [x] plan.md Decisions and Open questions confirmed present in DECISIONS.md / STATE.md (no copy needed)
 - [x] validation passes
 
 ## Validate
 npm run lint && npm run build && node scripts/check-data-parity.mjs && harness check
 
 ## Context
-CJ chose the name 2026-09-22. The local folder moves to ~/projects/dentaldoc after the push.
+Previous task (rename to dentaldoc) was DONE. dental-supply/ is untracked work from another session; not part of this change.
