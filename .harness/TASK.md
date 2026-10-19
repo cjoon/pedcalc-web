@@ -2,21 +2,21 @@
 Status: DONE
 
 ## Goal
-Move .harness/plan.md `## Modules` into .harness/modules/<name>.md, per the refreshed AGENT.md first-session rule
+Complete the chart-data module's frozen-file list (review P2 on e4d2def)
 Plan: none
 
 ## Scope
-Allowed: .harness/modules/, .harness/STATE.md, .harness/TASK.md
-Off-limits: src/, dental-supply/ (another work stream, uncommitted), .harness/plan.md, .harness/DECISIONS.md
+Allowed: .harness/modules/chart-data.md, .harness/STATE.md, .harness/TASK.md
+Off-limits: src/, dental-supply/ (another work stream, uncommitted), .harness/plan.md
+Modules: chart-data
 
 ## Done when
 <!-- each item: a command or an observable result, not an adjective -->
-- [x] .harness/modules/chart-data.md and dosage.md exist, each rule traceable to plan.md `## Modules` and the source it names
-- [x] plan.md Decisions and Open questions confirmed present in DECISIONS.md / STATE.md (no copy needed)
+- [x] chart-data.md lists every file scripts/check-data-parity.mjs compares (4)
 - [x] validation passes
 
 ## Validate
 npm run lint && npm run build && node scripts/check-data-parity.mjs && harness check
 
 ## Context
-Previous task (rename to dentaldoc) was DONE. dental-supply/ is untracked work from another session; not part of this change.
+dental-supply/ is untracked work from another session; not part of this change.

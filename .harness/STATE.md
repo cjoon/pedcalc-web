@@ -1,5 +1,5 @@
 # State
-Updated: 2026-10-18 · plan.md Modules moved to .harness/modules/ (chart-data, dosage)
+Updated: 2026-10-19 · chart-data module lists all 4 parity-checked files
 
 ## Milestone
 Visit Note O-line vocabulary (not started) — done when 4 new groups are wired in and parity exits 0
