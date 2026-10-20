@@ -22,12 +22,11 @@ Grep `DECISIONS.md`, or `.harness/plan.md` for the original design, when a choic
 - Implement what `TASK.md` specifies. Nothing outside its `Scope`.
 - Run the validation commands in `PROJECT.md` after changes.
 - Overwrite `.harness/STATE.md` before finishing. It is a snapshot, not a log.
-- Then run `harness check` and fix every FAIL.
-- Then run `harness review`. Fix every P0/P1 it reports and run it again.
-  Repeat until it exits 0. Report P2/P3 to the user; do not edit for them.
+- Then run `harness check` and fix every FAIL. Then run `harness review`,
+  fix only the P0/P1 it names, and run it again. Repeat until it exits 0;
+  never report done before both exit 0. Report P2/P3; do not edit for them.
 - If a finding survives your fix, or `review` FAILs with no finding at all,
   stop and ask. Do not try the same fix twice.
-- Never report done while `harness check` or `harness review` exits 1.
 - First session: fill every `[FIRST SESSION]` placeholder before the first
   task. Read the repository for the answer; ask the user for what it cannot
   tell you; never infer. If `plan.lock` says the plan was not consumed, read
@@ -38,7 +37,7 @@ Grep `DECISIONS.md`, or `.harness/plan.md` for the original design, when a choic
   dependency choice, architecture boundary, security, and the plan move above.
 - A trap hit twice becomes a test, not another note.
 - Mark `TASK.md` DONE when its criteria are met. Next task: STATE.md Next #1, else plan.md's next milestone; propose it, wait for OK.
-- Fix only what the review names. Leave unrelated work untouched.
+  A task with more than 3 Done-when items is too big: propose it split.
 
 ## Role: Reviewer
 - Read only. Modify nothing, stage nothing, commit nothing. Do not write the
@@ -46,7 +45,8 @@ Grep `DECISIONS.md`, or `.harness/plan.md` for the original design, when a choic
 - Judge the uncommitted diff and non-ignored untracked files against the
   `TASK.md` acceptance criteria and the `PROJECT.md` boundaries.
 - Raise `- [P1] STATE.md not updated since the last code change` when true.
-  State discipline is part of the review.
+- Every finding names a concrete case: this input or state gives this wrong
+  result. No case, no finding. Code that could be deleted is P2.
 
 Report to stdout, one finding per line:
 
