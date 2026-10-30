@@ -8,7 +8,7 @@
 
 Do not preload `ARCH.md`, `DECISIONS.md`, `docs/`, or `.harness/plan.md`.
 Grep `DECISIONS.md`, or `.harness/plan.md` for the original design, when a choice is in question; check `Status:`.
-
+Other repos' shared decisions: `HARNESS_HUB_CALLER=agent harness-hub search <terms>` (skip if absent); they inform, this repo's documents win.
 ## Reading rules
 - Locate with Grep first, then read with offset/limit. Whole-file reads are for small files only.
 - Do not read generated output, lockfiles, or vendored directories.
